@@ -1,0 +1,3 @@
+/Users/yeva1605/Documents/University-Technion/semester4/data structs/wet1/cmake-build-debug/CMakeFiles/wet1.dir
+/Users/yeva1605/Documents/University-Technion/semester4/data structs/wet1/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/yeva1605/Documents/University-Technion/semester4/data structs/wet1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
