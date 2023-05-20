@@ -40,17 +40,94 @@ public:
 
     //additional methods
     TreeNode* insert(TreeNode* node, const T& value);
-    bool find(const T& value);
-    void remove(TreeNode *v);
-    //TODO: add remove function
+    TreeNode* find(const T& value);
+    TreeNode* findMin(TreeNode* v);
+    TreeNode* remove(const T& value, TreeNode *v);
 
 private:
+
     T key;
     TreeNode *left;
     TreeNode *right;
     int height;
     int weight;
 };
+
+template<class T>
+TreeNode<T> *TreeNode<T>::findMin(TreeNode *v) {
+    if ( v == NULL){
+        return NULL;
+    }
+    //min is only on sub left tree
+    else if (v->left == NULL){
+        return v;
+    }
+    //min will be found on subtree on the left only
+    else return findMin(v->left);
+}
+
+template<class T>
+TreeNode<T>* TreeNode<T>::remove(const T& value, TreeNode *v) {
+    TreeNode* temp;
+
+    //if value not found, remove returns NULL.
+    if (v == NULL){
+        return NULL;
+    }
+
+    //binary search for the element. ALL CASES ONLY FOR FOUND ELEMENT
+    //case1: value to be found is smaller than current value
+    else if ( value < v->key){
+        v->left = remove(value, v->left);
+    }
+    //case2: value to be found is greater than current value
+    else if ( value > v->key){
+        v->right = remove(value, v->right);
+    }
+    //case3.1: element is found with two subtrees
+    else if (v->left != NULL && v->right != NULL){
+        //find the new head of the right subtree
+        temp = findMin(v->right);
+        //copy the min element in right subtree
+        v->key = temp->key;
+        //delete other(!) element which we have just copied.
+        v->right = remove(v->key, v->right);
+    }
+    //case3.2: element is found with one or none subtrees
+    else {
+        temp = v;
+        if (v->left == NULL){
+            v = v->right;
+        }
+        else if (v->right == NULL){
+            v = v->left;
+        }
+        delete temp;
+    }
+    //in case v is the last on any subtree;
+    if ( v == NULL){
+        return v;
+    }
+    //update new heights:
+    v->updateHeight();
+
+    //recursively rotations if needed, from bottom -> up:
+    //case1: if left node is deleted, right is heavier, rotation to left
+    if (get_balance_factor(v) == 2){
+        if (get_balance_factor(v->left) == -1){
+            return rotate_LR(v);
+        }
+        else return rotate_LL(v);
+    }
+    //case2: if right node is deleted, left is heavier, rotation to right
+    else if (get_balance_factor(v) == -2){
+        if (get_balance_factor(v->right) == 1){
+            return rotate_RL(v);
+        }
+        else return rotate_RR(v);
+    }
+    return v;
+}
 
 //constructor
 template <class T>
@@ -103,6 +180,7 @@ void TreeNode<T>::updateHeight() {
 
 template<class T>
 int TreeNode<T>::getHeight() {
+    if (this == NULL) return -1;
     return height;
 }
 
@@ -127,22 +205,18 @@ int TreeNode<T>::get_balance_factor(TreeNode *current)
 {
     if (current == NULL)
         return 0;
-    int l = 0, r = 0;
-    if (current ->left != NULL ){
-        l = current->left->getHeight();
-    }
-    if (current ->right != NULL ){
-        r = current->right->getHeight();
-    }
+    int l, r;
+    l = current->left->getHeight();
+    r = current->right->getHeight();
     return l-r;
 }
 
 //Method to determine whether some value already exist
 template<class T>
-bool TreeNode<T>::find(const T &value) {
-    if (this == NULL) return false;
+TreeNode<T>* TreeNode<T>::find(const T &value) {
+    if (this == NULL) return NULL;
 
-    if (this->key == value) return true;
+    if (this->key == value) return this;
 
     if (this->key < value) {
         this = this->right;
@@ -249,10 +323,6 @@ TreeNode<T> *TreeNode<T>::right_rotate(TreeNode *B) {
     //return new root
     return A;
 }
-
-
-
-
 
 // Function to get the maximum of two integers
 int max(int a, int b){
