@@ -41,7 +41,7 @@ private:
     Node *root;
 
     // Rotation methods
-    int get_balance_factor(Node *current);
+    int get_balance_factor(Node *v);
     void updateHeight(Node* v);
     Node* right_rotate(Node* B);
     Node* left_rotate(Node* A);
