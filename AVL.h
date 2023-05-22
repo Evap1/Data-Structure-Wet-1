@@ -16,42 +16,47 @@ template <class T>
 class TreeNode
 {
 public:
+
+    TreeNode();
     ~TreeNode();
 
     // Getters
     int getHeight();
-    TreeNode* getLeft();
-    TreeNode* getRight();
-    T getKey();
 
     // Only visible operations:
-    void insert(const T& value);
+    void insert(T value);
     void remove(const T& value);
+    void print_tree();
 
 private:
-    TreeNode();
-    T key;
-    TreeNode *left;
-    TreeNode *right;
-    TreeNode *root;
-    int height;
-    int weight;
+    class Node{
+    public:
+        explicit Node(T value) : key(value), left(NULL), right(NULL), height(0) {}
+        T key;
+        Node* left;
+        Node* right;
+        int height;
+    };
+
+    Node *root;
 
     // Rotation methods
-    int get_balance_factor(TreeNode *current);
-    void updateHeight();
-    TreeNode* right_rotate(TreeNode* B);
-    TreeNode* left_rotate(TreeNode* A);
-    TreeNode* rotate_LL(TreeNode *v);
-    TreeNode* rotate_RL(TreeNode *v);
-    TreeNode* rotate_LR(TreeNode *v);
-    TreeNode* rotate_RR(TreeNode *v);
+    int get_balance_factor(Node *current);
+    void updateHeight(Node* v);
+    Node* right_rotate(Node* B);
+    Node* left_rotate(Node* A);
+    Node* rotate_LL(Node *v);
+    Node* rotate_RL(Node *v);
+    Node* rotate_LR(Node *v);
+    Node* rotate_RR(Node *v);
 
     // additional methods
-    TreeNode* insert(TreeNode* node, const T& value);
-    TreeNode* find(const T& value);
-    TreeNode* findMin(TreeNode* v);
-    TreeNode* remove(const T& value, TreeNode *v);
+    Node* insert(Node* node, const T& value);
+    Node* find(const T& value);
+    Node* findMin(Node* v);
+    Node* remove(const T& value, Node *v);
+    void delete_tree(Node* v);
+    void inorder(Node* v);
 };
 
 // PRIVATE METHODS:
@@ -59,12 +64,7 @@ private:
 // private constructor to be accessed once: defines our root to be empty.
 template <class T>
 TreeNode<T>::TreeNode() :
-        key(NULL),
-        left(NULL),
-        right(NULL),
-        root(NULL),
-        height(0),
-        weight(0)
+        root(NULL)
 {}
 
 // Destructor
@@ -72,45 +72,51 @@ TreeNode<T>::TreeNode() :
 // maybe void recursion
 template <class T>
 TreeNode<T>::~TreeNode(){
-    if (left != NULL){
-        delete left;
-    }
-    if (right != NULL){
-        delete right;
-    }
+    delete_tree(root);
 }
 
+// Additional helper method for destructor. Recursive method since we have no parent pointers and
+//  destructor doesn't have return value
+template<class T>
+void TreeNode<T>::delete_tree(Node *v) {
+    if (v == NULL){
+        return;
+    }
+    delete_tree(v->left);
+    delete_tree(v->right);
+    delete v;
+}
 // dealing with possibility that we are too low in the tree
 // works as a setter
 template<class T>
-void TreeNode<T>::updateHeight() {
-    if (left == NULL){
-        if (right == NULL){
-            height = 0;
+void TreeNode<T>::updateHeight(Node* v) {
+    if (v->left == NULL){
+        if (v->right == NULL){
+            v->height = 0;
         }
-        height = right->height + 1;
+        else v->height = v->right->height + 1;
     }
-    else if (right == NULL){
-        height = left->height + 1;
+    else if (v->right == NULL){
+        v->height = v->left->height + 1;
     }
-    height = 1 + max(left->height, right->height);
+    else v->height = 1 + max(v->left->height, v->right->height);
 }
 
 // Get the balance factor of a node
 template<class T>
-int TreeNode<T>::get_balance_factor(TreeNode *current)
+int TreeNode<T>::get_balance_factor(Node *current)
 {
     if (current == NULL)
         return 0;
     int l, r;
-    l = current->left->getHeight();
-    r = current->right->getHeight();
+    l = current->left->height;
+    r = current->right->height;
     return l-r;
 }
 
 // Method to determine whether some value already exist
 template<class T>
-TreeNode<T>* TreeNode<T>::find(const T &value) {
+typename TreeNode<T>::Node* TreeNode<T>::find(const T &value) {
     if (this == NULL) return NULL;
 
     if (this->key == value) return this;
@@ -121,14 +127,14 @@ TreeNode<T>* TreeNode<T>::find(const T &value) {
 
     this = this->left;
 
-    return find(value);;
+    return find(value);
 }
 
 // Insert new node as a leaf and make rotations if needed to remain balanced tree- all the way to the root.
 template<class T>
-TreeNode<T> *TreeNode<T>::insert(TreeNode* node, const T& value) {
+typename TreeNode<T>::Node *TreeNode<T>::insert(Node* node, const T& value) {
     if (node == NULL){
-        node = new TreeNode(value);
+        node = new Node(value);
     }
 
     if (node->key < value){
@@ -156,7 +162,7 @@ TreeNode<T> *TreeNode<T>::insert(TreeNode* node, const T& value) {
 }
 // Find min value and return it's node.
 template<class T>
-TreeNode<T> *TreeNode<T>::findMin(TreeNode *v) {
+typename TreeNode<T>::Node* TreeNode<T>::findMin(Node *v) {
     if ( v == NULL){
         return NULL;
     }
@@ -170,8 +176,8 @@ TreeNode<T> *TreeNode<T>::findMin(TreeNode *v) {
 
 // Delete a node and re-balance the tree - all the way to the root.
 template<class T>
-TreeNode<T>* TreeNode<T>::remove(const T& value, TreeNode *v) {
-    TreeNode* temp;
+typename TreeNode<T>::Node* TreeNode<T>::remove(const T& value, Node *v) {
+    Node* temp;
 
     // if value not found, remove returns NULL.
     if (v == NULL){
@@ -212,7 +218,7 @@ TreeNode<T>* TreeNode<T>::remove(const T& value, TreeNode *v) {
         return v;
     }
     //update new heights:
-    v->updateHeight();
+    updateHeight(v);
 
     // recursively rotations if needed, from bottom -> up:
     // case1: if left node is deleted, right is heavier, rotation to left
@@ -234,46 +240,46 @@ TreeNode<T>* TreeNode<T>::remove(const T& value, TreeNode *v) {
 
 // When lowest node is on the LL path from v.
 template<class T>
-TreeNode<T> *TreeNode<T>::rotate_LL(TreeNode *v) {
+typename TreeNode<T>::Node* TreeNode<T>::rotate_LL(Node *v) {
     return right_rotate(v) ;
 }
 
 // When lowest node is on the RR path from v.
 template<class T>
-TreeNode<T> *TreeNode<T>::rotate_RR(TreeNode *v) {
+typename TreeNode<T>::Node* TreeNode<T>::rotate_RR(Node *v) {
     return left_rotate(v) ;
 }
 
 // When lowest node is on the RL path from v.
 template<class T>
-TreeNode<T> *TreeNode<T>::rotate_RL(TreeNode *v) {
-    TreeNode* vr = v->right;
+typename TreeNode<T>::Node* TreeNode<T>::rotate_RL(Node *v) {
+    Node* vr = v->right;
     v->right = right_rotate(vr);
     return left_rotate(v) ;
 }
 
 // When lowest node is on the LR path from v.
 template<class T>
-TreeNode<T> *TreeNode<T>::rotate_LR(TreeNode *v) {
-    TreeNode* vl = v->left;
+typename TreeNode<T>::Node* TreeNode<T>::rotate_LR(Node *v) {
+    Node* vl = v->left;
     v->left = left_rotate(vl);
     return right_rotate(v) ;
 }
 
 // performing left rotation when A was the src root and then B is the final root.
 template<class T>
-TreeNode<T> *TreeNode<T>::left_rotate(TreeNode *A) {
+typename TreeNode<T>::Node* TreeNode<T>::left_rotate(Node *A) {
     //Sub-trees and nodes to be modified
-    TreeNode* B= A->right;
-    TreeNode* Bl = B->left;
+    Node* B= A->right;
+    Node* Bl = B->left;
 
     //make rotation
     B->left = A;
     A->right= Bl;
 
     //update height
-    A->updateHeight();
-    B->updateHeight();
+    updateHeight(A);
+    updateHeight(B);
 
     //return new root
     return B;
@@ -281,18 +287,18 @@ TreeNode<T> *TreeNode<T>::left_rotate(TreeNode *A) {
 
 // performing right rotation when B was the src root and then A is the final root.
 template<class T>
-TreeNode<T> *TreeNode<T>::right_rotate(TreeNode *B) {
+typename TreeNode<T>::Node* TreeNode<T>::right_rotate(Node *B) {
     //Sub-trees and nodes to be modified
-    TreeNode* A = B->left;
-    TreeNode* Ar = A->right;
+    Node* A = B->left;
+    Node* Ar = A->right;
 
     //make rotation
     A->right = B;
     B->left = Ar;
 
     //update height
-    A->updateHeight();
-    B->updateHeight();
+    updateHeight(A);
+    updateHeight(B);
 
     //return new root
     return A;
@@ -303,6 +309,14 @@ int max(int a, int b){
     return a > b ? a : b ;
 }
 
+// Print function to show the current tree. left, root, right.
+template<class T>
+void TreeNode<T>::inorder(Node *v) {
+    if (v == NULL) return;
+    inorder(v->left);
+    cout << v->key << " , ";
+    inorder(v->right);
+}
 
 // PUBLIC METHODS:
 template<class T>
@@ -311,31 +325,21 @@ void TreeNode<T>::remove(const T &value) {
 }
 
 template<class T>
-void TreeNode<T>::insert(const T &value) {
-    root = insert(value, root);
+void TreeNode<T>::insert(T value) {
+    root = insert(root, value);
 }
 
+template<class T>
+void TreeNode<T>::print_tree() {
+    inorder(root);
+    cout << endl;
+}
 
 // Getters:
 template<class T>
 int TreeNode<T>::getHeight() {
     if (this == NULL) return -1;
-    return height;
-}
-
-template<class T>
-TreeNode<T> *TreeNode<T>::getLeft() {
-    return left;
-}
-
-template<class T>
-TreeNode<T> *TreeNode<T>::getRight() {
-    return right;
-}
-
-template<class T>
-T TreeNode<T>::getKey() {
-    return key;
+    return this->height;
 }
 
 #endif //WET1_AVL_H

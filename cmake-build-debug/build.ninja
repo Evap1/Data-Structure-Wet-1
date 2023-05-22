@@ -52,18 +52,6 @@ build CMakeFiles/wet1.dir/main.cpp.o: CXX_COMPILER__wet1_Debug /Users/yeva1605/D
   OBJECT_DIR = CMakeFiles/wet1.dir
   OBJECT_FILE_DIR = CMakeFiles/wet1.dir
 
-build CMakeFiles/wet1.dir/AVL.cpp.o: CXX_COMPILER__wet1_Debug /Users/yeva1605/Documents/University-Technion/semester4/data$ structs/wet1/AVL.cpp || cmake_object_order_depends_target_wet1
-  DEP_FILE = CMakeFiles/wet1.dir/AVL.cpp.o.d
-  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -fcolor-diagnostics -std=gnu++17
-  OBJECT_DIR = CMakeFiles/wet1.dir
-  OBJECT_FILE_DIR = CMakeFiles/wet1.dir
-
-build CMakeFiles/wet1.dir/Movie.cpp.o: CXX_COMPILER__wet1_Debug /Users/yeva1605/Documents/University-Technion/semester4/data$ structs/wet1/cmake-build-debug/Movie.cpp || cmake_object_order_depends_target_wet1
-  DEP_FILE = CMakeFiles/wet1.dir/Movie.cpp.o.d
-  FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -fcolor-diagnostics -std=gnu++17
-  OBJECT_DIR = CMakeFiles/wet1.dir
-  OBJECT_FILE_DIR = CMakeFiles/wet1.dir
-
 
 # =============================================================================
 # Link build statements for EXECUTABLE target wet1
@@ -72,7 +60,7 @@ build CMakeFiles/wet1.dir/Movie.cpp.o: CXX_COMPILER__wet1_Debug /Users/yeva1605/
 #############################################
 # Link the executable wet1
 
-build wet1: CXX_EXECUTABLE_LINKER__wet1_Debug CMakeFiles/wet1.dir/main.cpp.o CMakeFiles/wet1.dir/AVL.cpp.o CMakeFiles/wet1.dir/Movie.cpp.o
+build wet1: CXX_EXECUTABLE_LINKER__wet1_Debug CMakeFiles/wet1.dir/main.cpp.o
   FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk
   OBJECT_DIR = CMakeFiles/wet1.dir
   POST_BUILD = :
