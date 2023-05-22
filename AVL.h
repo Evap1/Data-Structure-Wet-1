@@ -104,13 +104,25 @@ void TreeNode<T>::updateHeight(Node* v) {
 
 // Get the balance factor of a node
 template<class T>
-int TreeNode<T>::get_balance_factor(Node *current)
+int TreeNode<T>::get_balance_factor(Node *v)
 {
-    if (current == NULL)
+    if (v == NULL)
         return 0;
-    int l, r;
-    l = current->left->height;
-    r = current->right->height;
+    int l=0, r=0;
+    if (v->left == NULL){
+        if (v->right == NULL){
+            return 0;
+        }
+        else r = v->right->height;
+    }
+    else if (v->right == NULL){
+        l = v->left->height;
+    }
+    else {
+        l = v->left->height;
+        r = v->right->height;
+    }
+
     return l-r;
 }
 
