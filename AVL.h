@@ -23,6 +23,7 @@ public:
 
     // Getters
     int getHeight();
+    int getCounter();
 
     // Only visible operations:
     void insert(T value);
@@ -42,6 +43,7 @@ private:
     };
 
     Node *root;
+    int elementsCount;
 
     // Rotation methods
     int get_balance_factor(Node *v);
@@ -70,7 +72,8 @@ private:
 // private constructor to be accessed once: defines our root to be empty.
 template <class T>
 TreeNode<T>::TreeNode() :
-        root(NULL)
+        root(NULL),
+        elementsCount(0)
         {}
 
 // Destructor
@@ -155,6 +158,7 @@ template<class T>
 typename TreeNode<T>::Node *TreeNode<T>::insert(Node* node, const T& value) {
     if (node == NULL){
         node = new Node(value);
+        elementsCount++;
     }
 
     if (node->key < value){
@@ -339,6 +343,10 @@ void TreeNode<T>::inorder(Node *v) {
 // PUBLIC METHODS:
 template<class T>
 void TreeNode<T>::remove(const T &value) {
+    // removing one element only if exists
+    if (find(value)!= NULL){
+        elementsCount--;
+    }
     root = remove(value,root);
 }
 
@@ -360,6 +368,10 @@ int TreeNode<T>::getHeight() {
     return this->height;
 }
 
+template<class T>
+int TreeNode<T>::getCounter() {
+    return this->elementsCount;
+}
 
 template<class T>
 void TreeNode<T>::printBT(const std::string& prefix, const Node* node, bool isLeft)
