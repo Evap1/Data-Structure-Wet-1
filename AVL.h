@@ -16,21 +16,6 @@ using namespace std;
 template <class T>
 class TreeNode
 {
-public:
-
-    TreeNode();
-    ~TreeNode();
-
-    // Getters
-    int getHeight();
-    int getCounter();
-
-    // Only visible operations:
-    void insert(T value);
-    void remove(const T& value);
-    void print_tree();
-    void printBT(const TreeNode& tree);
-
 
 private:
     class Node{
@@ -59,13 +44,31 @@ private:
 
     // additional methods
     Node* insert(Node* node, const T& value);
-    Node* find(const T& value);
+    Node* find(Node* v, const T &value);
     Node* findMin(Node* v);
     Node* remove(const T& value, Node *v);
     void delete_tree(Node* v);
     void inorder(Node* v);
     void printBT(const std::string& prefix, const Node* node, bool isLeft);
+
+public:
+
+    TreeNode();
+    ~TreeNode();
+
+    // Getters
+    int getHeight();
+    int getCounter();
+
+    // Only visible operations:
+    void insert(T value);
+    void remove(const T& value);
+    Node* find(const T& value);
+    void print_tree();
+    void printBT(const TreeNode& tree);
 };
+
+
 
 // PRIVATE METHODS:
 
@@ -139,18 +142,18 @@ int TreeNode<T>::get_balance_factor(Node *v) {
 
 // Method to determine whether some value already exist
 template<class T>
-typename TreeNode<T>::Node* TreeNode<T>::find(const T &value) {
-    if (this == NULL) return NULL;
+typename TreeNode<T>::Node* TreeNode<T>::find(Node* v, const T &value) {
+    if (v == NULL) return NULL;
 
-    if (this->key == value) return this;
-
-    if (this->key < value) {
-        this = this->right;
+    if (v->key == value){
+        return v;
     }
-
-    this = this->left;
-
-    return find(value);
+    else if (v->key < value){
+        return find(v->right, value);
+    }
+    else{
+        return find(v->left, value);
+    }
 }
 
 // Insert new node as a leaf and make rotations if needed to remain balanced tree- all the way to the root.
@@ -249,7 +252,7 @@ typename TreeNode<T>::Node* TreeNode<T>::remove(const T& value, Node *v) {
         delete temp;
     }
     //in case v is the last on any subtree;
-    if ( v == NULL){
+    if ( v == NULL ){
         return v;
     }
     //update new heights:
@@ -344,7 +347,7 @@ void TreeNode<T>::inorder(Node *v) {
 template<class T>
 void TreeNode<T>::remove(const T &value) {
     // removing one element only if exists
-    if (find(value)!= NULL){
+    if (find(root, value)!= NULL){
         elementsCount--;
     }
     root = remove(value,root);
@@ -371,6 +374,11 @@ int TreeNode<T>::getHeight() {
 template<class T>
 int TreeNode<T>::getCounter() {
     return this->elementsCount;
+}
+
+template<class T>
+typename TreeNode<T>::Node *TreeNode<T>::find(const T &value) {
+    return find(root,value);
 }
 
 template<class T>
