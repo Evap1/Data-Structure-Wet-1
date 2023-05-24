@@ -5,6 +5,9 @@
 #ifndef WET1_MOVIE_H
 #define WET1_MOVIE_H
 
+class Movies{
+
+};
 
 
 #endif //WET1_MOVIE_H

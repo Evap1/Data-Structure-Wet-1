@@ -20,13 +20,10 @@ int main()
     t.insert(38);
     t.insert(69);
     t.print_tree();
-    t.get_root();
     t.remove(1);
     t.print_tree();
-    t.get_root();
     t.insert(8);
     t.print_tree();
-    t.get_root();
     t.remove(5);
     t.remove(35);
     t.remove(65);
@@ -38,5 +35,4 @@ int main()
     t.print_tree();
     t.remove(25);
     t.print_tree();
-    t.get_root();
 }
