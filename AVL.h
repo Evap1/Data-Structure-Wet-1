@@ -30,7 +30,6 @@ public:
     void printBT(const TreeNode& tree);
 
 
-
 private:
     class Node{
     public:
@@ -71,7 +70,7 @@ private:
 template <class T>
 TreeNode<T>::TreeNode() :
         root(NULL)
-{}
+        {}
 
 // Destructor
 // ATTENTION may not work, make sure valngrid
@@ -98,7 +97,6 @@ template<class T>
 void TreeNode<T>::updateHeight(Node* v) {
     if (v->left == NULL){
         if (v->right == NULL){
-            v->height = 0;
         }
         else v->height = v->right->height + 1;
     }
@@ -110,32 +108,26 @@ void TreeNode<T>::updateHeight(Node* v) {
 
 // Get the balance factor of a node
 template<class T>
-int TreeNode<T>::get_balance_factor(Node *v)
-{
+int TreeNode<T>::get_balance_factor(Node *v) {
     if (v == NULL)
         return 0;
-    int l=0, r=0;
+    int l = 0, r = 0;
 
-if (v->left == NULL){
-    {
-        l = -1;
-        if (v->right == NULL){
-            return 0;
-        }
-        else r = v->right->height;
+    if (v->left == NULL) {
+            l = -1;
+            if (v->right == NULL) {
+                return 0;
+            } else r = v->right->height;
     }
-
-    }
-    else if (v->right == NULL){
-        r = -1;
-        l = v->left->height;
-    }
-    else {
+    else if (v->right == NULL) {
+            r = -1;
+            l = v->left->height;
+    } else {
         l = v->left->height;
         r = v->right->height;
-    }
+        }
 
-    return l-r;
+    return l - r;
 }
 
 // Method to determine whether some value already exist
