@@ -10,6 +10,7 @@ using namespace std;
 
 //TODO: test this whole thing
 //TODO: operator = not really because it's pointers
+//TODO: DELETE PRINT FUNCTIONS
 
 // AVL Tree
 template <class T>
@@ -113,19 +114,22 @@ int TreeNode<T>::get_balance_factor(Node *v) {
         return 0;
     int l = 0, r = 0;
 
-    if (v->left == NULL) {
-            l = -1;
-            if (v->right == NULL) {
-                return 0;
-            } else r = v->right->height;
+    if (v->left == NULL)
+    {
+        l = -1;
+        if (v->right == NULL) return 0;
+        else r = v->right->height;
     }
-    else if (v->right == NULL) {
-            r = -1;
-            l = v->left->height;
-    } else {
+    else if (v->right == NULL)
+    {
+        r = -1;
+        l = v->left->height;
+    }
+    else
+    {
         l = v->left->height;
         r = v->right->height;
-        }
+    }
 
     return l - r;
 }
