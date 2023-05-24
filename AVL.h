@@ -27,6 +27,9 @@ public:
     void insert(T value);
     void remove(const T& value);
     void print_tree();
+    void printBT(const TreeNode& tree);
+
+
 
 private:
     class Node{
@@ -49,6 +52,8 @@ private:
     Node* rotate_RL(Node *v);
     Node* rotate_LR(Node *v);
     Node* rotate_RR(Node *v);
+    Node* balance_Tree(Node* node);
+
 
     // additional methods
     Node* insert(Node* node, const T& value);
@@ -57,6 +62,7 @@ private:
     Node* remove(const T& value, Node *v);
     void delete_tree(Node* v);
     void inorder(Node* v);
+    void printBT(const std::string& prefix, const Node* node, bool isLeft);
 };
 
 // PRIVATE METHODS:
@@ -109,13 +115,19 @@ int TreeNode<T>::get_balance_factor(Node *v)
     if (v == NULL)
         return 0;
     int l=0, r=0;
-    if (v->left == NULL){
+
+if (v->left == NULL){
+    {
+        l = -1;
         if (v->right == NULL){
             return 0;
         }
         else r = v->right->height;
     }
+
+    }
     else if (v->right == NULL){
+        r = -1;
         l = v->left->height;
     }
     else {
@@ -151,27 +163,38 @@ typename TreeNode<T>::Node *TreeNode<T>::insert(Node* node, const T& value) {
 
     if (node->key < value){
         node->right = insert(node->right, value);
+    }
+
+    if (node->key > value){
+        node->left = insert(node->left, value);
+    }
+
+    node = balance_Tree(node);
+    updateHeight(node);
+    return node;
+}
+
+
+template <class T>
+typename TreeNode<T>::Node* TreeNode<T>::balance_Tree(Node* node)
+{
+    if (get_balance_factor(node) == -2){
+            if (get_balance_factor(node->right) == 1){
+                node = rotate_RL(node);
+            }
+            else node = rotate_RR(node);
+        }
+
         if (get_balance_factor(node) == 2){
             if (get_balance_factor(node->left) == -1){
                 node = rotate_LR(node);
             }
             else node = rotate_LL(node);
         }
-    }
-
-    if (node->key > value){
-        node->left = insert(node->left, value);
-        if (get_balance_factor(node) == -2){
-            if (get_balance_factor(node->right) == 1){
-                node = rotate_RL(node);
-            }
-            else node = rotate_RR(node);
-        }
-    }
-
-    updateHeight(node);
-    return node;
+     return node;
 }
+
+
 // Find min value and return it's node.
 template<class T>
 typename TreeNode<T>::Node* TreeNode<T>::findMin(Node *v) {
@@ -232,21 +255,8 @@ typename TreeNode<T>::Node* TreeNode<T>::remove(const T& value, Node *v) {
     //update new heights:
     updateHeight(v);
 
-    // recursively rotations if needed, from bottom -> up:
-    // case1: if left node is deleted, right is heavier, rotation to left
-    if (get_balance_factor(v) == 2){
-        if (get_balance_factor(v->left) == -1){
-            return rotate_LR(v);
-        }
-        else return rotate_LL(v);
-    }
-        // case2: if right node is deleted, left is heavier, rotation to right
-    else if (get_balance_factor(v) == -2){
-        if (get_balance_factor(v->right) == 1){
-            return rotate_RL(v);
-        }
-        else return rotate_RR(v);
-    }
+    //rotations if needed, from bottom -> up:
+    v = balance_Tree(v);
     return v;
 }
 
@@ -353,5 +363,33 @@ int TreeNode<T>::getHeight() {
     if (this == NULL) return -1;
     return this->height;
 }
+
+
+template<class T>
+void TreeNode<T>::printBT(const std::string& prefix, const Node* node, bool isLeft)
+{
+    if( node != nullptr )
+    {
+        std::cout << prefix;
+
+        std::cout << (isLeft ? "├──" : "└──" );
+
+        // print the value of the node
+        std::cout << node->key << std::endl;
+
+        // enter the next tree level - left and right branch
+        printBT( prefix + (isLeft ? "│   " : "    "), node->left, true);
+        printBT( prefix + (isLeft ? "│   " : "    "), node->right, false);
+    }
+}
+
+template<class T>
+void TreeNode<T>::printBT(const TreeNode& tree)
+{
+    printBT("", tree.root, false);    
+}
+
+
+
 
 #endif //WET1_AVL_H
