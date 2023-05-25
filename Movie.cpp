@@ -8,6 +8,12 @@
 //________________________Constructor_________________________
 
 // Consumer must check if ID already exists
+
+/// @brief 
+/// @param id Consumer must check if ID already exists
+/// @param genreType movie's Genre
+/// @param viewsCount movies views till now
+/// @param isVip is the movie for vip's only?
 Movie::Movie(int id, Genre genreType, int viewsCount, bool isVip) : 
     movieId(id), genre(genreType), views(viewsCount), vipOnly(isVip)
 {
@@ -37,6 +43,13 @@ void Movie::add_rating(int rated)
         rate = (ratersCont * rate + rated) / (ratersCont + 1);
         ratersCont++;
     }
+}
+
+/// @brief prints Movie's properties
+void Movie::printMovie() const
+{
+    std::cout << "Movie Id: " << movieId << "\n Genre: " << (int)genre << "\n VipOnly: " << vipOnly 
+        << "\n Rate" << rate << "\n Views: " << views << std::endl;
 }
 
 

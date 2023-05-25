@@ -3,6 +3,7 @@
 #define WET1_MOVIE_H
 
 #include "wet1util.h"
+#include<iostream>
 
 
 class Movie{
@@ -18,7 +19,8 @@ class Movie{
 
 public:
     Movie(int id, Genre genreType, int viewsCount, bool isVip);
-    ~Movie() = default;
+    Movie(const Movie& movie) = delete;
+    ~Movie() =  default;
 
     int getMovieId() const;
     Genre getGenre() const;
@@ -29,6 +31,7 @@ public:
     void add_views(int count);
     void add_rating(int rate);
 
+    void printMovie() const;
 
 
 };
