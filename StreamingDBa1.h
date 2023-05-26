@@ -16,12 +16,20 @@
 #define STREAMINGDBA1_H_
 
 #include "wet1util.h"
+#include "Group.h"
+#include "User.h"
+#include "Movie.h"
 
 class streaming_database {
 private:
 	//
 	// Here you may add anything you want
 	//
+    // None holds the whole tree sorted by : TBD
+    TreeNode<Movie>* moviesByGenre[(int)(Genre::NONE)+1];
+    TreeNode<User> users;
+    TreeNode<Group> groups;
+
 	
 public:
 	// <DO-NOT-MODIFY> {

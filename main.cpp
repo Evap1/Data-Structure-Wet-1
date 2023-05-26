@@ -19,20 +19,18 @@ int main()
     t.insert(89);
     t.insert(38);
     t.insert(69);
-    t.print_tree();
-    t.remove(1);
-    t.print_tree();
     t.insert(8);
-    t.print_tree();
+
     t.remove(5);
     t.remove(35);
     t.remove(65);
     t.remove(89);
+    t.remove(100);
     t.remove(43);
     t.remove(88);
     t.remove(20);
     t.remove(38);
-    t.print_tree();
+
     t.remove(25);
-    t.print_tree();
+
 }

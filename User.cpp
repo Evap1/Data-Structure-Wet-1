@@ -47,3 +47,8 @@ bool operator<(const User& user1, const User& user2)
 {
     return (user2 > user1);
 }
+
+bool operator==(const User& user1, const User& user2)
+{
+    return (user1.getUserId() == user2.getUserId());
+}

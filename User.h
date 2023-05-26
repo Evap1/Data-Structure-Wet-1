@@ -23,9 +23,10 @@ public:
     int get_views_per_genre(Genre type) const;
     void add_views_in_genre(Genre type, int nunOfViews);
 };
+
 bool operator>(const User &user1, const User &user2);
 bool operator<(const User& user1, const User& user2);
-
+bool operator==(const User& user1, const User& user2);
 
 
 #endif //WET1_USER_H
