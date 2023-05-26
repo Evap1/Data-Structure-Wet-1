@@ -25,6 +25,11 @@ private:
 	//
 	// Here you may add anything you want
 	//
+    // None holds the whole tree sorted by : TBD
+    TreeNode<Movie>* moviesByGenre[(int)(Genre::NONE)+1];
+    TreeNode<User> users;
+    TreeNode<Group> groups;
+
 	
 public:
 	// <DO-NOT-MODIFY> {
