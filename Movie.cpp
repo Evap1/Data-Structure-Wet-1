@@ -84,9 +84,17 @@ double Movie::getRate() const{
 // ___________________________________________Operator Overloading__________________________________________
 
 
+/// @brief Operator > for movies
+/// @param movie1 
+/// @param movie2 
+/// @return 
 bool operator>(const Movie &movie1, const Movie &movie2)
 {
+    // if we are in a search of a movie by ID with a temp movie
+    if(movie1.getGenre() == Genre::NONE || movie2.getGenre() == Genre::NONE)
+        return (movie1.getId() > movie2.getId());
 
+    // regular movie equivalent
     if(movie1.getRate() > movie2.getRate())
         return true;
     else if (movie1.getRate() == movie2.getRate())
@@ -108,5 +116,17 @@ bool operator<(const Movie& movie1, const Movie& movie2)
     return (movie2 > movie1);
 }
 
+
+
+// /// @brief check if the movies are equals by their Id
+// /// @param movie1 
+// /// @param movie2 
+// /// @return 
+// bool operator==(const Movie &movie1, const Movie &movie2)
+// {
+//     if(!(movie1>movie2 || movie1<movie2))
+//         return true;
+//     return false;
+// }
 
 
