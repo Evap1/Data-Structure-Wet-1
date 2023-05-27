@@ -533,5 +533,4 @@ void TreeNode<T>::inorder(Node<T> *v) {
     inorder(v->right);
 }
 
-
 #endif //WET1_AVL_H

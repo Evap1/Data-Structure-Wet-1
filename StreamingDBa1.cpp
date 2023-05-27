@@ -1,4 +1,6 @@
 #include "StreamingDBa1.h"
+#include "AVL.h"
+StatusType correct_status(StatusType status1,StatusType status2);
 
 streaming_database::streaming_database()
 {
@@ -54,42 +56,42 @@ StatusType streaming_database::remove_movie(int movieId)
 	// TODO: Your code goes here
 }
 
+/// @brief add new user to users tree.
+/// @param userId
+/// @param isVip
+/// @return Status of the operation
 StatusType streaming_database::add_user(int userId, bool isVip)
 {
-
-	if(userId <= 0)
-		return StatusType::INVALID_INPUT;
-
-	User* user = new User(userId,isVip);
-	if(users.find(*user) == NULL)
-		return users.insert(*user);
-
-	/// TODO: insert must return status type
-	return StatusType::FAILURE;
-
+	if (userId <= 0) return StatusType::INVALID_INPUT;
+    return users.insert(User(userId,isVip));
 }
 
+/// @brief remove existing user from users tree.
+/// @param userId
+/// @return Status of the operation
 StatusType streaming_database::remove_user(int userId)
 {
-	/// TODO: Tree remove must return status type
-
-	if(userId <= 0)
-		return StatusType::INVALID_INPUT;
-
-	User* u = new User(userId, false);
-	return users.remove(*u);
-
-	// TODO: Your code goes here
+    if (userId <= 0) return StatusType::INVALID_INPUT;
+	return users.remove(User(userId));
 }
 
+/// @brief add an empty new group to groups tree.
+/// @param groupId
+/// @return Status of the operation
 StatusType streaming_database::add_group(int groupId)
 {
-	// TODO: Your code goes here
-	return StatusType::SUCCESS;
+    if (groupId <= 0) return StatusType::INVALID_INPUT;
+	return groups.insert(Group(groupId));
 }
 
+/// @brief
+/// @param groupId
+/// @return
+//TODO: need to fill array with users and set their group to NONE
 StatusType streaming_database::remove_group(int groupId)
 {
+    Node<Group>* toDelete = groups.find(Group(groupId));
+
 	// TODO: Your code goes here
 	return StatusType::SUCCESS;
 }
@@ -114,12 +116,21 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
 
 output_t<int> streaming_database::get_all_movies_count(Genre genre)
 {
-	output_t<int>* temp = new output_t<int>(moviesByGenre[(int)genre]->get_counter());
+
+
+	if(moviesByGenre[(int)genre] != NULL)
+    {
+		output_t<int>* temp = new output_t<int>(moviesByGenre[(int)genre]->get_counter());
+			return *temp;
+
+    }
+	output_t<int>* temp = new output_t<int>(0);
 	return *temp;
 
-    // TODO: Your code goes here
-    // static int i = 0;
-    // return (i++==0) ? 11 : 2;
+    // // TODO: Your code goes here
+    // output[0] = 4001;
+    // output[1] = 4002;
+    return StatusType::SUCCESS;
 }
 
 StatusType streaming_database::get_all_movies(Genre genre, int *const output)
@@ -176,9 +187,17 @@ output_t<int> streaming_database::get_group_recommendation(int groupId)
     return (i++==0) ? 11 : 2;
 }
 
+/// @brief Checks what a function needs to return if there are more than one status type
+/// @param status1
+/// @param status2
+/// @return
+StatusType correct_status(StatusType status1,StatusType status2)
+{
+    if(status1 == StatusType::SUCCESS && status2 == StatusType::SUCCESS)
+        return StatusType::SUCCESS;
 
 
-
+}
 
 
 /// @brief Checks what a function needs to return if there are more than one status type
