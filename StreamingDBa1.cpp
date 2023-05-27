@@ -54,12 +54,19 @@ StatusType streaming_database::remove_movie(int movieId)
 	// TODO: Your code goes here
 }
 
+
+
+
 StatusType streaming_database::add_user(int userId, bool isVip)
 {
+	if (userId <= 0) return StatusType::INVALID_INPUT;
+    return users.insert(User(userId,isVip));
 }
 
 StatusType streaming_database::remove_user(int userId)
 {
+	if (userId <= 0) return StatusType::INVALID_INPUT;
+    return users.remove(User(userId));
 }
 
 StatusType streaming_database::add_group(int groupId)
