@@ -36,7 +36,7 @@ private:
     TreeNode<Group> groups;
 
 
-int get_all_movies_inside(Node<Movie>* moviesTree, int *const output);
+int get_all_movies_inside(const Node<Movie>* moviesRoot, int *const output);
 
 
 

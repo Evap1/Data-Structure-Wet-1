@@ -92,7 +92,7 @@ bool operator>(const Movie &movie1, const Movie &movie2)
 {
     // if we are in a search of a movie by ID with a temp movie
     if(movie1.getGenre() == Genre::NONE || movie2.getGenre() == Genre::NONE)
-        return (movie1.getId() > movie2.getId());
+        return (movie1.getMovieId() > movie2.getMovieId());
 
     // regular movie equivalent
     if(movie1.getRate() > movie2.getRate())

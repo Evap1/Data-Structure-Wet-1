@@ -24,16 +24,23 @@ public:
     Node() : key(NULL), left(NULL), right(NULL), height(0) {}
     ~Node() = default;
     Node<T>& operator = (const Node<T>&other);
-    //TODO:
+
     const T& get_key() {return key;};
-    const T* get_left() {return left;};
-    const T* get_right() {return right;};
+    const T& get_key() const{return key;};
+
+    const Node<T>* get_left() {return left;};
+    const Node<T>* get_left() const {return left;};
+
+    const Node<T>* get_right() {return right;};
+    const Node<T>* get_right() const {return right;};
+
+
 
 
 private:
     T key;
-    Node* left;
-    Node* right;
+    Node<T>* left;
+    Node<T>* right;
     int height;
 };
 

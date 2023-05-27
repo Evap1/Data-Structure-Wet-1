@@ -26,9 +26,6 @@ StatusType streaming_database::add_movie(int movieId, Genre genre, int views, bo
 
 	}
 
-
-
-	/// TODO: insert must return status type
 	return StatusType::FAILURE;
 
 
@@ -41,18 +38,17 @@ StatusType streaming_database::remove_movie(int movieId)
 	if(movieId <=0)
 		return StatusType::INVALID_INPUT;
 	Movie* m = new Movie(movieId,Genre::NONE,0, false);
-
-	if(moviesByGenre[(int)Genre::NONE]->find(*m) != NULL)
+	Node<Movie>* node =  moviesByGenre[(int)Genre::NONE]->findBy(*m, IdSearch);
+	if(node != NULL)
 	{
-		StatusType status1 = moviesByGenre[(int)genre]->remove(*m);
+		StatusType status1 = moviesByGenre[(int)node->get_key().getGenre()]->remove(*m);
 		StatusType status2 = moviesByGenre[(int)Genre::NONE]->remove(*m);
 		return correct_status(status1, status2);
-
 	}
 
-	/// TODO: remove must return status type
 	return moviesByGenre[(int)Genre::NONE]->remove(*m);
 
+	/// TODO: need to create a function that can find a movie by its id only!
 	// TODO: Your code goes here
 }
 
@@ -117,8 +113,7 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
 output_t<int> streaming_database::get_all_movies_count(Genre genre)
 {
 
-
-	if(moviesByGenre[(int)genre] != NULL)
+	if(moviesByGenre[(int)genre] != NULL && moviesByGenre[(int)genre]->get_root() != NULL)
     {
 		output_t<int>* temp = new output_t<int>(moviesByGenre[(int)genre]->get_counter());
 			return *temp;
@@ -133,6 +128,7 @@ output_t<int> streaming_database::get_all_movies_count(Genre genre)
     return StatusType::SUCCESS;
 }
 
+
 StatusType streaming_database::get_all_movies(Genre genre, int *const output)
 {
 	if(output == NULL)
@@ -142,9 +138,9 @@ StatusType streaming_database::get_all_movies(Genre genre, int *const output)
 		||(genre != Genre::NONE && get_all_movies_count(genre).ans() <=0 ))
 			return StatusType::FAILURE;
 
-	if(moviesByGenre[(int)genre] != NULL)
+	if(moviesByGenre[(int)genre]->get_root() != NULL)
 	{
-		get_all_movies(moviesByGenre[(int)genre]->get_root(), output);
+		get_all_movies_inside(moviesByGenre[(int)genre]->get_root(), output);
 		return StatusType::SUCCESS;
 	}
 
@@ -153,18 +149,23 @@ StatusType streaming_database::get_all_movies(Genre genre, int *const output)
     // output[1] = 4002;
 }
 
-int streaming_database::get_all_movies_inside(Node<Movie>* moviesTree, int *const output)
+/// Inside private function!
+/// @brief An inside functuion that recursively puts the movies ID's in output array by inorder sort
+/// @param moviesTree 
+/// @param output 
+/// @return The return is for the rcursion for the indexing in the array
+int streaming_database::get_all_movies_inside(const Node<Movie>* moviesRoot, int *const output)
 {
 
 	/// TODO: create a get left and get right function to the tree
-	if (moviesTree == NULL){
+	if (moviesRoot == NULL){
 		return 0;
 	}
 
-	int i = get_all_movies_inside(moviesTree->get_left() , output);
-	output[i] = moviesTree->get_key().getMovieId();
+	int i = get_all_movies_inside(moviesRoot->get_left() , output);
+	output[i] = moviesRoot->get_key().getMovieId();
 	i++;
-	i += get_all_movies_inside(moviesTree->get_right() , output);
+	i += get_all_movies_inside(moviesRoot->get_right() , output);
 	return i;
 }
 
@@ -176,8 +177,23 @@ output_t<int> streaming_database::get_num_views(int userId, Genre genre)
 
 StatusType streaming_database::rate_movie(int userId, int movieId, int rating)
 {
-    // TODO: Your code goes here
-    return StatusType::SUCCESS;
+	if(userId<=0 || movieId <=0 || rating < 0 || rating > 100)
+		return StatusType::INVALID_INPUT;
+	
+	if((users != NULL) && (!users.findBy((User(userId, false), idSearch))))
+		return StatusType::FAILURE;
+
+	if(moviesByGenre[(int)Genre::NONE] != NULL && moviesByGenre[(int)Genre::NONE]->get_root() != NULL)\
+	{
+		Movie* movie = *(moviesByGenre[(int)Genre::NONE]->findBy(Movie(movieId,Genre::NONE, 0, false), idSearch));
+		if(movie != NULL)
+		{
+			movie->add_rating(rating);
+			return StatusType::SUCCESS;
+		}
+	}
+
+	return StatusType::FAILURE;
 }
 
 output_t<int> streaming_database::get_group_recommendation(int groupId)
@@ -187,17 +203,6 @@ output_t<int> streaming_database::get_group_recommendation(int groupId)
     return (i++==0) ? 11 : 2;
 }
 
-/// @brief Checks what a function needs to return if there are more than one status type
-/// @param status1
-/// @param status2
-/// @return
-StatusType correct_status(StatusType status1,StatusType status2)
-{
-    if(status1 == StatusType::SUCCESS && status2 == StatusType::SUCCESS)
-        return StatusType::SUCCESS;
-
-
-}
 
 
 /// @brief Checks what a function needs to return if there are more than one status type
