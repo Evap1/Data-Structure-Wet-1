@@ -57,15 +57,8 @@ StatusType streaming_database::remove_movie(int movieId)
 StatusType streaming_database::add_user(int userId, bool isVip)
 {
 
-	if(userId <= 0)
-		return StatusType::INVALID_INPUT;
-
-	User* user = new User(userId,isVip);
-	if(users.find(*user) == NULL)
-		return users.insert(*user);
-
 	/// TODO: insert must return status type
-	return StatusType::FAILURE;
+
 
 }
 
@@ -73,13 +66,6 @@ StatusType streaming_database::remove_user(int userId)
 {
 	/// TODO: Tree remove must return status type
 
-	if(userId <= 0)
-		return StatusType::INVALID_INPUT;
-
-	User* u = new User(userId, false);
-	return users.remove(*u);
-
-	// TODO: Your code goes here
 }
 
 StatusType streaming_database::add_group(int groupId)
