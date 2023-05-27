@@ -35,6 +35,12 @@ private:
     TreeNode<User> users;
     TreeNode<Group> groups;
 
+
+int get_all_movies_inside(Node<Movie>* moviesTree, int *const output);
+
+
+
+
 	
 public:
 	// <DO-NOT-MODIFY> {

@@ -54,19 +54,32 @@ StatusType streaming_database::remove_movie(int movieId)
 	// TODO: Your code goes here
 }
 
-
-
-
 StatusType streaming_database::add_user(int userId, bool isVip)
 {
-	if (userId <= 0) return StatusType::INVALID_INPUT;
-    return users.insert(User(userId,isVip));
+
+	if(userId <= 0)
+		return StatusType::INVALID_INPUT;
+
+	User* user = new User(userId,isVip);
+	if(users.find(*user) == NULL)
+		return users.insert(*user);
+
+	/// TODO: insert must return status type
+	return StatusType::FAILURE;
+
 }
 
 StatusType streaming_database::remove_user(int userId)
 {
-	if (userId <= 0) return StatusType::INVALID_INPUT;
-    return users.remove(User(userId));
+	/// TODO: Tree remove must return status type
+
+	if(userId <= 0)
+		return StatusType::INVALID_INPUT;
+
+	User* u = new User(userId, false);
+	return users.remove(*u);
+
+	// TODO: Your code goes here
 }
 
 StatusType streaming_database::add_group(int groupId)
@@ -101,7 +114,7 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
 
 output_t<int> streaming_database::get_all_movies_count(Genre genre)
 {
-	output_t<int>* temp = new output_t<int>(moviesByGenre[(int)genre]->getCounter());
+	output_t<int>* temp = new output_t<int>(moviesByGenre[(int)genre]->get_counter());
 	return *temp;
 
     // TODO: Your code goes here
@@ -111,38 +124,37 @@ output_t<int> streaming_database::get_all_movies_count(Genre genre)
 
 StatusType streaming_database::get_all_movies(Genre genre, int *const output)
 {
+	if(output == NULL)
+		return StatusType::INVALID_INPUT;
+	
+	if((genre == Genre::NONE && get_all_movies_count(genre).ans() <=0) 
+		||(genre != Genre::NONE && get_all_movies_count(genre).ans() <=0 ))
+			return StatusType::FAILURE;
 
 	if(moviesByGenre[(int)genre] != NULL)
 	{
-		return get_all_movies(moviesByGenre[(int)genre], output);
-
+		get_all_movies(moviesByGenre[(int)genre]->get_root(), output);
+		return StatusType::SUCCESS;
 	}
 
     // // TODO: Your code goes here
     // output[0] = 4001;
     // output[1] = 4002;
-    return StatusType::SUCCESS;
 }
 
-void streaming_database::get_all_movies(TreeNode<Movie>* moviesTree, int *const output)
+int streaming_database::get_all_movies_inside(Node<Movie>* moviesTree, int *const output)
 {
 
 	/// TODO: create a get left and get right function to the tree
 	if (moviesTree == NULL){
-		return;
+		return 0;
 	}
 
-	if (moviesTree->get){
-		node->right = insert(node->right, value);
-	}
-
-	if (node->key > value){
-		node->left = insert(node->left, value);
-	}
-
-	node = balance_Tree(node);
-	updateHeight(node);
-	return node;
+	int i = get_all_movies_inside(moviesTree->get_left() , output);
+	output[i] = moviesTree->get_key().getMovieId();
+	i++;
+	i += get_all_movies_inside(moviesTree->get_right() , output);
+	return i;
 }
 
 output_t<int> streaming_database::get_num_views(int userId, Genre genre)
