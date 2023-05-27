@@ -56,16 +56,10 @@ StatusType streaming_database::remove_movie(int movieId)
 
 StatusType streaming_database::add_user(int userId, bool isVip)
 {
-
-	/// TODO: insert must return status type
-
-
 }
 
 StatusType streaming_database::remove_user(int userId)
 {
-	/// TODO: Tree remove must return status type
-
 }
 
 StatusType streaming_database::add_group(int groupId)
