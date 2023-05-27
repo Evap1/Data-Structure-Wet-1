@@ -19,8 +19,11 @@ public:
     void add_user(const User& member);
     int get_member_count();
     int get_id() const;
+    void empty_group();
     void set_views_per_movie(Genre type);
 };
+
+// ___________________________________________Operator Overloading__________________________________________
 
 bool operator>(const Group &group1, const Group &group2);
 bool operator<(const Group& group1, const Group& group2);

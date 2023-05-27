@@ -23,26 +23,39 @@ StatusType streaming_database::remove_movie(int movieId)
 	return StatusType::SUCCESS;
 }
 
+/// @brief add new user to users tree.
+/// @param userId
+/// @param isVip
+/// @return Status of the operation
 StatusType streaming_database::add_user(int userId, bool isVip)
 {
-	// TODO: Your code goes here
-	return StatusType::SUCCESS;
+	if (userId <= 0) return StatusType::INVALID_INPUT;
+    return users.insert(User(userId,isVip));
 }
-
+/// @brief remove existing user from users tree.
+/// @param userId
+/// @return Status of the operation
 StatusType streaming_database::remove_user(int userId)
 {
-	// TODO: Your code goes here
-	return StatusType::SUCCESS;
+    if (userId <= 0) return StatusType::INVALID_INPUT;
+	return users.remove(User(userId));
 }
-
+/// @brief add an empty new group to groups tree.
+/// @param groupId
+/// @return Status of the operation
 StatusType streaming_database::add_group(int groupId)
 {
-	// TODO: Your code goes here
-	return StatusType::SUCCESS;
+    if (groupId <= 0) return StatusType::INVALID_INPUT;
+	return groups.insert(Group(groupId));
 }
-
+/// @brief
+/// @param groupId
+/// @return
+//TODO: need to fill array with users and set their group to NONE
 StatusType streaming_database::remove_group(int groupId)
 {
+    Node<Group>* toDelete = groups.find(Group(groupId));
+
 	// TODO: Your code goes here
 	return StatusType::SUCCESS;
 }

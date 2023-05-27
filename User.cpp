@@ -4,26 +4,34 @@
 
 #include "User.h"
 
-// Constructor
-// Consumer must check if ID already exists
-User::User(int userId,bool isVip) : userId(userId), isVip(isVip) {}
+// _________________________________________________CONSTRUCTOR______________________________________________________________
 
-// Add views to certain genre
+// TODO: Consumer must check if ID already exists
+User::User(int userId,bool isVip) : userId(userId), isVip(isVip) , groupId(NONE) {}
+User::User(int userId): userId(userId), isVip(false), groupId(0){}
+
+/// @brief Add views to certain genre
+/// @param type
+/// @param nunOfViews
 void User::add_views_in_genre(Genre type, int nunOfViews){
     viewsPerGenre[(int)type]+=nunOfViews;
 }
 
+/// @param type
+/// @return how many movies the current user watched, of genre type.
 int User::get_views_per_genre(Genre type) const {
     return viewsPerGenre[(int)type];
 }
 
-// SETTERS
-void User::setGroupId(int id) {
+// _________________________________________________SETTERS______________________________________________________________
+
+void User::set_group_id(int id) {
     User::groupId = id;
 }
 
-// GETTERS
-int User::getUserId() const {
+// _________________________________________________GETTERS______________________________________________________________
+
+int User::get_user_id() const {
     return userId;
 }
 
@@ -31,16 +39,16 @@ bool User::is_vip() const {
     return isVip;
 }
 
-
-
-int User::getGroupId() const {
+int User::get_group_id() const {
     return groupId;
 }
 
-// Operator overloading
+
+// ___________________________________________Operator Overloading__________________________________________
+
 bool operator>(const User &user1, const User &user2)
 {
-    return (user1.getUserId() > user2.getUserId());
+    return (user1.get_user_id() > user2.get_user_id());
 }
 
 bool operator<(const User& user1, const User& user2)
@@ -50,5 +58,5 @@ bool operator<(const User& user1, const User& user2)
 
 bool operator==(const User& user1, const User& user2)
 {
-    return (user1.getUserId() == user2.getUserId());
+    return (user1.get_user_id() == user2.get_user_id());
 }
