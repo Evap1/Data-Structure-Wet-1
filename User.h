@@ -7,7 +7,7 @@
 #include "wet1util.h"
 #include "AVL.h"
 
-class User{
+class User {
 private:
     int userId;
     bool isVip;
@@ -18,11 +18,12 @@ public:
     explicit User(int userId,bool isVip);
     explicit User(int userId);
     void set_group_id(int id);
+    void leave_group();
     int get_user_id() const;
     bool is_vip() const;
     int get_group_id() const;
     int get_views_per_genre(Genre type) const;
-    void add_views_in_genre(Genre type, int nunOfViews);
+    void add_views_in_genre(Genre type);
     static const int NONE = -1;
 };
 

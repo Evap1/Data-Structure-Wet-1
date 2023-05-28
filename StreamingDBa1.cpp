@@ -99,34 +99,87 @@ StatusType streaming_database::add_group(int groupId)
 	return groups.insert(Group(groupId));
 }
 
-/// @brief
+/// @brief remove node group from the tree group. unsign all memebers
+/// related to the group and delete it's tree.
 /// @param groupId
 /// @return
 //TODO: need to fill array with users and set their group to NONE
 StatusType streaming_database::remove_group(int groupId)
 {
-    Node<Group>* toDelete = groups.find(Group(groupId));
-
-	// TODO: Your code goes here
-	return StatusType::SUCCESS;
+    if (groupId <= 0) return StatusType::INVALID_INPUT;
+    // unassiagn all related users.
+    groups.find(Group(groupId))->get_key_by_ref()->empty_group();
+    return groups.remove(Group(groupId));
 }
 
+/// @brief add user by id , to a user tree inside a group by id
+/// @param userId
+/// @param groupId
+/// @return status if operation
 StatusType streaming_database::add_user_to_group(int userId, int groupId)
 {
-	// TODO: Your code goes here
+    // check input
+    if (groupId <= 0 || userId <= 0) return StatusType::INVALID_INPUT;
+    // find group in the tree. if not found, it's a failure
+    Node<Group>* NodeGroupToUpdate = groups.find(Group(groupId));
+    if (NodeGroupToUpdate == NULL) return StatusType::FAILURE;
+    // find ptr to user to add. if not found, it's a failure
+    User* UserToAdd = users.find(User(userId))->get_key_by_ref();
+    if (UserToAdd == NULL) return StatusType::FAILURE;
+    // if user has group, it's a failure. otherwise; update the group id of the user
+    int UserGroup = UserToAdd->get_group_id();
+    if (UserGroup != User::NONE) return StatusType::FAILURE;
+    UserToAdd->set_group_id(groupId);
+    // add user to the current group tree
+    return NodeGroupToUpdate->get_key_to_set().add_user(UserToAdd);
+}
+
+
+StatusType streaming_database::user_watch(int userId, int movieId) {
+    // check input
+    if (movieId <= 0 || userId <= 0) return StatusType::INVALID_INPUT;
+    // find ptr to user to add. if not found, it's a failure
+    User *UserToAdd = users.find(User(userId))->get_key_by_ref();
+    if (UserToAdd == NULL) return StatusType::FAILURE;
+    // find ptr to user to movie. if not found, it's a failure
+    //TODO: add find by id, in NONE tree.
+    Movie *MovieToUpdate;
+    if (MovieToUpdate == NULL) return StatusType::FAILURE;
+    // check if movie is vip and user allowed to watch
+    // user not allowed
+    if (MovieToUpdate->isVipOnly() && !UserToAdd->is_vip()) {
+        return StatusType::FAILURE;
+    }
+    // TODO: update the counter in all 4 trees
+    // update views for user
+    UserToAdd->add_views_in_genre(MovieToUpdate->getGenre());
+    // calculate the status
     return StatusType::SUCCESS;
 }
 
-StatusType streaming_database::user_watch(int userId, int movieId)
-{
-	// TODO: Your code goes here
-    return StatusType::SUCCESS;
-}
 
 StatusType streaming_database::group_watch(int groupId,int movieId)
 {
-	// TODO: Your code goes here
-	return StatusType::SUCCESS;
+    // check input
+    if (movieId <= 0 || groupId <= 0) return StatusType::INVALID_INPUT;
+    // find ptr to group to add. if not found, it's a failure
+    Group *GroupToAdd = groups.find(Group(groupId))->get_key_by_ref();
+    if (GroupToAdd == NULL || GroupToAdd->get_member_count() == 0) return StatusType::FAILURE;
+    // find ptr to user to movie. if not found, it's a failure
+    //TODO: add find by id, in NONE tree.
+    Movie *MovieToUpdate;
+    if (MovieToUpdate == NULL) return StatusType::FAILURE;
+    // check if movie is vip and user allowed to watch
+    // user not allowed
+    if (MovieToUpdate->isVipOnly() && !GroupToAdd->is_vip()) {
+        return StatusType::FAILURE;
+    }
+    // TODO: update the counter in all 4 trees
+    // update views for group
+    GroupToAdd->set_views_per_movie(MovieToUpdate->getGenre());
+
+    // TODO: calculate the status
+    return StatusType::SUCCESS;
 }
 
 output_t<int> streaming_database::get_all_movies_count(Genre genre)
@@ -190,8 +243,21 @@ int streaming_database::get_all_movies_inside(const Node<Movie>* moviesRoot, int
 
 output_t<int> streaming_database::get_num_views(int userId, Genre genre)
 {
-	// TODO: Your code goes here
-	return 2008;
+    // check input
+    if (userId <= 0) return StatusType::INVALID_INPUT;
+    // find ptr to user to add. if not found, it's a failure
+    User *UserToAdd = users.find(User(userId))->get_key_by_ref();
+    // user not found:
+    if (UserToAdd == NULL) return StatusType::FAILURE;
+    int counter = 0;
+    if (genre == Genre::NONE){
+        for ( int i = 0; i < (int)Genre::NONE; i++ ){
+            counter += UserToAdd->get_views_per_genre((Genre)(i));
+        }
+    }
+    else counter = UserToAdd->get_views_per_genre(genre);
+
+    return {output_t(counter)};
 }
 
 StatusType streaming_database::rate_movie(int userId, int movieId, int rating)

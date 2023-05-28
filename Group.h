@@ -12,14 +12,20 @@ private:
     int groupId;
     bool isVip;
     int viewsAsGroup[(int)Genre::NONE] = {0};
-    TreeNode<User> members;
+    //TODO:
+    TreeNode<User*>* members;
 
 public:
+    // TODO: destructor
     explicit Group(int id);
-    void add_user(const User& member);
+    ~Group();
+    StatusType add_user(User* member);
     int get_member_count();
     int get_id() const;
+    bool is_vip();
     void empty_group();
+    void empty_group_aux(Node<User*>* v);
+    StatusType free_members();
     void set_views_per_movie(Genre type);
 };
 

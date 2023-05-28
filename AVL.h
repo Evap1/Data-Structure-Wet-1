@@ -6,10 +6,13 @@
 #define WET1_AVL_H
 
 #include<iostream>
+#include "User.h"
+
 using namespace std;
 
 //TODO: test this whole thing
 //TODO: DELETE PRINT FUNCTIONS
+// TODO: should we put ptr to key
 
 // Implementation later on
 template <class T>
@@ -20,6 +23,7 @@ template <class T>
 class Node{
 public:
     friend class TreeNode<T>;
+
     explicit Node(const T& value) : key(value), left(NULL), right(NULL), height(0) {}
     Node() : key(NULL), left(NULL), right(NULL), height(0) {}
     ~Node() = default;
@@ -27,6 +31,7 @@ public:
 
 
     const T& get_key() {return key;};
+
     const T& get_key() const{return key;};
     T* get_key_to_set() {return &key;}
 
@@ -36,7 +41,9 @@ public:
     const Node<T>* get_right() {return right;};
     const Node<T>* get_right() const {return right;};
 
-
+    T get_key_to_set() {return key ;};
+    T* get_key_by_ref() {return &key ;};
+    void set_key(const T& value);
 
 
 private:
@@ -45,6 +52,11 @@ private:
     Node<T>* right;
     int height;
 };
+
+template<class T>
+void Node<T>::set_key(const T &value) {
+    key = value;
+}
 
 // AVL Tree
 template <class T>
@@ -92,6 +104,7 @@ public:
     // Only visible operations:
     StatusType insert(const T& value);
     StatusType remove(const T& value);
+    StatusType delete_tree();
     Node<T>* find(const T& value);
     void list_inorder(Node<T>** arr);
     void print_tree();
@@ -437,6 +450,21 @@ template<class T>
 void TreeNode<T>::list_inorder(Node<T> **arr) {
     list_inorder_aux(root, arr, 0);
 }
+
+/// @brief outside helper method to delete a tree without destructor (used with ptrs)
+/// @tparam T
+/// @return
+template<class T>
+StatusType TreeNode<T>::delete_tree(){
+    try {
+        delete_tree(root);
+    }
+    catch (...){
+        throw runtime_error("AVLTree, delete_tree(root) has a problem.");
+    }
+    return StatusType::SUCCESS;
+}
+
 
 /// @brief remove one element with a value.
 /// @tparam T -class type
