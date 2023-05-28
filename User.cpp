@@ -13,8 +13,8 @@ User::User(int userId): userId(userId), isVip(false), groupId(0){}
 /// @brief Add views to certain genre
 /// @param type
 /// @param nunOfViews
-void User::add_views_in_genre(Genre type, int nunOfViews){
-    viewsPerGenre[(int)type]+=nunOfViews;
+void User::add_views_in_genre(Genre type){
+    viewsPerGenre[(int)type]++;
 }
 
 /// @param type
@@ -27,6 +27,10 @@ int User::get_views_per_genre(Genre type) const {
 
 void User::set_group_id(int id) {
     User::groupId = id;
+}
+
+void User::leave_group() {
+    groupId = NONE;
 }
 
 // _________________________________________________GETTERS______________________________________________________________
@@ -42,6 +46,7 @@ bool User::is_vip() const {
 int User::get_group_id() const {
     return groupId;
 }
+
 
 
 // ___________________________________________Operator Overloading__________________________________________
