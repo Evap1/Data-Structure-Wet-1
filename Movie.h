@@ -5,6 +5,9 @@
 #include "wet1util.h"
 #include<iostream>
 
+class IdSearch;
+
+
 
 class Movie{
 
@@ -18,6 +21,9 @@ class Movie{
     int ratersCont;
 
 public:
+
+    // friend class IdSearch;
+
     Movie(int id, Genre genreType, int viewsCount, bool isVip);
     Movie(const Movie& movie) = delete;
     ~Movie() =  default;
@@ -35,6 +41,36 @@ public:
 
 
 };
+
+
+
+// Equalitu
+enum struct Equality {
+    LESS           = 0,
+    EQUAL            = 1,
+    GREATER           = 2,
+};
+
+class IdSearch{
+
+    
+    public:
+    IdSearch() = default;
+    bool operator()(const Movie& movie1, const Movie& movie2, Equality kind) const
+    {
+        if(kind == Equality::LESS)
+            return movie1.getMovieId() < movie2.getMovieId();   
+
+        if(kind == Equality::EQUAL)
+            return movie1.getMovieId() == movie2.getMovieId();
+
+        if(kind == Equality::GREATER)
+            return movie1.getMovieId() > movie2.getMovieId();
+    }
+};
+
+
+
 
 
 #endif //WET1_MOVIE_H
