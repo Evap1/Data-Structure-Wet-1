@@ -28,17 +28,28 @@ public:
     Node() : key(NULL), left(NULL), right(NULL), height(0) {}
     ~Node() = default;
     Node<T>& operator = (const Node<T>&other);
-    //TODO:
+
+
     const T& get_key() {return key;};
+
+    const T& get_key() const{return key;};
+    T* get_key_to_set() {return &key;}
+
+    const Node<T>* get_left() {return left;};
+    const Node<T>* get_left() const {return left;};
+
+    const Node<T>* get_right() {return right;};
+    const Node<T>* get_right() const {return right;};
+
     T get_key_to_set() {return key ;};
     T* get_key_by_ref() {return &key ;};
     void set_key(const T& value);
-    Node* get_right() { return right;};
-    Node* get_left() {return left;};
+
+
 private:
     T key;
-    Node* left;
-    Node* right;
+    Node<T>* left;
+    Node<T>* right;
     int height;
 };
 
@@ -77,6 +88,10 @@ private:
     int list_inorder_aux( Node<T>* v, Node<T> **arr, int index);
     void printBT(const std::string& prefix, const Node<T>* node, bool isLeft);
 
+    template <class Condition>
+    Node<T>* findBy_inside(Node<T> * node,Node<T> * root, Condition condition);
+
+
 public:
     TreeNode();
     ~TreeNode();
@@ -94,6 +109,15 @@ public:
     void list_inorder(Node<T>** arr);
     void print_tree();
     void printBT(const TreeNode& tree);
+
+    template <class Condition>
+    Node<T>* findBy(Node<T> * node, Condition condition);
+    template <class Condition>
+    StatusType insertBy(const T& value, Condition condition);
+    template <class Condition>
+    Node<T>* insertBy(Node<T>* node, const T& value, Condition condition);
+
+
 };
 
 // -----------------------------------------PRIVATE METHODS----------------------------------------
@@ -213,7 +237,7 @@ Node<T>* TreeNode<T>::find(Node<T>* v, const T &value) {
 template<class T>
 Node<T> *TreeNode<T>::insert(Node<T>* node, const T& value) {
     if (node == NULL){
-        node = new Node(value);
+        node = new Node<T>(value);
         elementsCount++;
     }
 
@@ -558,6 +582,92 @@ void TreeNode<T>::inorder(Node<T> *v) {
     cout << v->key << " , ";
     inorder(v->right);
 }
+
+
+
+
+template <class T>
+template <class Condition>
+Node<T>* TreeNode<T>::findBy(Node<T> * node, Condition condition)
+{
+    if (node == NULL) return NULL;
+    return findBy_inside(node, root, condition);
+}
+
+/// @brief find the node by using the condition function
+/// @tparam T 
+/// @param node 
+/// @param root 
+/// @param condition 
+/// @return 
+template <class T>
+template <class Condition>
+Node<T>* TreeNode<T>::findBy_inside(Node<T> * node,Node<T> * root, Condition condition) 
+{
+    if (root == NULL) return NULL;
+
+    if (condition(node->get_key(), root->get_key(), Equality::EQUAL)){
+        return root;
+    }
+    else if (ondition(node->get_key(), root->get_key(), Equality::LESS)){
+        return findBy_inside(node,root->get_right(),condition);
+    }
+    else{
+        return findBy_inside(node,root->get_left(),condition);
+    }
+}
+
+
+/// @brief insert one element with a value.
+/// @tparam T -class type
+/// @param value - to be added.
+/// @return Status of the operation.
+template<class T>
+template <class Condition>
+StatusType TreeNode<T>::insertBy(const T& value, Condition condition) {
+    // inserting one element only if NOT exists
+    if (findBy(root, value, condition) == NULL){
+        try {
+            root = insertBy(root, value, condition);
+        }
+        catch (const std::bad_alloc&){
+            return StatusType::ALLOCATION_ERROR;
+        }
+        return StatusType::SUCCESS;
+    }
+    // already exists
+    return StatusType::FAILURE;
+}
+
+/// @brief Insert new node as a leaf and make rotations if needed to remain balanced tree- all the way to the root.
+/// @tparam T - the class type
+/// @param node - usually called with root with public func find.
+/// @param value - to insert
+/// @return - ptr to the original node.
+template<class T>
+template <class Condition>
+Node<T> *TreeNode<T>::insertBy(Node<T>* node, const T& value, Condition condition) {
+    if (node == NULL){
+        node = new Node(value);
+        elementsCount++;
+    }
+
+    if (condition(node->key, value, Equality::LESS)){
+        node->right = insertBy(node->right, value, condition);
+    }
+
+    if (condition(node->key, value, Equality::GREATER)){
+        node->left = insertBy(node->left, value);
+    }
+
+    node = balance_Tree(node);
+    updateHeight(node);
+    return node;
+}
+
+
+
+
 
 
 #endif //WET1_AVL_H
