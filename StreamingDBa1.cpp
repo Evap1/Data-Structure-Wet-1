@@ -209,7 +209,11 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
 
     // find ptr to user to movie. if not found, it's a failure
     //TODO: add find by id, in NONE tree.
-    Movie *MovieToUpdate;
+    IdSearch idSearch;
+	Node<Movie>* tempMovieNode = new Node<Movie>(Movie(movieId,Genre::NONE,0, false));
+	tempMovieNode = moviesByID[(int)Genre::NONE]->findBy(tempMovieNode, idSearch);
+	Movie *MovieToUpdate = tempMovieNode->get_key_by_ref();
+
     if (MovieToUpdate == NULL) return StatusType::FAILURE;
 
     // check if movie is vip and user allowed to watch
@@ -218,7 +222,8 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
         return StatusType::FAILURE;
     }
     // TODO: update the counter in all 4 trees
-	
+	int viewsCount = GroupToAdd->get_member_count();
+	do_to_all_4_movies_trees(tempMovieNode, viewsCount, FunctionType::UPDATE_VIEWS);
 
     // update views for group
     GroupToAdd->set_views_per_movie(MovieToUpdate->getGenre());
@@ -401,7 +406,7 @@ output_t<int> streaming_database::get_group_recommendation(int groupId)
     }
 
     int favId = bestMovie[(int)favourite]->get_key_by_ref()->getMovieId();
-    return {output_t(favId)};
+    return {output_t<int>(favId)};
 }
 
 
@@ -484,14 +489,13 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
 		if(count > 0)
 			return StatusType::INVALID_INPUT;
 
-		status1 = moviesByRateing[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(1);
-		status2 = moviesByRateing[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(1);
-		status3 = moviesByID[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(1);
-		status4 = moviesByID[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(1);
+		status1 = moviesByRateing[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(count);
+		status2 = moviesByRateing[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(count);
+		status3 = moviesByID[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(count);
+		status4 = moviesByID[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(count);
 
 		break;
 	}
-	
 	default:
 		break;
 	}

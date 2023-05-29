@@ -493,7 +493,7 @@ StatusType TreeNode<T>::remove(const T &value) {
 /// @return Status of the operation.
 template<class T>
 StatusType TreeNode<T>::insert(const T& value) {
-    if (value == NULL) return StatusType::FAILURE;
+    //if (value == nullptr) return StatusType::FAILURE;
 
     // inserting one element only if NOT exists
     if (find(root, value) == NULL){
@@ -515,8 +515,8 @@ StatusType TreeNode<T>::insert(const T& value) {
 /// @return - NULL if not found , the ptr to element if found.
 template<class T>
 Node<T> *TreeNode<T>::find(const T &value) const {
-    if(value == NULL)
-        return NULL;
+    // if(value == NULL)
+    //     return NULL;
     return find(root,value);
 }
 

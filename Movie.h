@@ -43,6 +43,10 @@ public:
 
 };
 
+bool operator>(const Movie &movie1, const Movie &movie2);
+bool operator<(const Movie& movie1, const Movie& movie2);
+bool operator==(const Movie &movie1, const Movie &movie2);
+
 
 
 class IdSearch{
