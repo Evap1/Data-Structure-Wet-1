@@ -37,20 +37,18 @@ public:
     ~Node() = default;
     Node<T>& operator = (const Node<T>&other);
 
-
     const T& get_key() {return key;};
     const T& get_key() const{return key;};
+    T get_key_to_set() {return key ;};
+    T* get_key_by_ref() {return &key ;};
 
+    Node<T>* get_left_nonConst() {return left;};
     const Node<T>* get_left() {return left;};
     const Node<T>* get_left() const {return left;};
 
+    Node<T>* get_right_nonConst() {return right;};
     const Node<T>* get_right() {return right;};
     const Node<T>* get_right() const {return right;};
-
-    T get_key_to_set() {return key ;};
-    T* get_key_by_ref() {return &key ;};
-    void set_key(const T& value);
-
 
 private:
     T key;
@@ -117,8 +115,6 @@ public:
     StatusType insertBy(const T& value, Condition condition);
     template <class Condition>
     Node<T>* insertBy(Node<T>* node, const T& value, Condition condition);
-
-
 };
 
 // -----------------------------------------PRIVATE METHODS----------------------------------------
@@ -452,6 +448,7 @@ void TreeNode<T>::list_inorder(Node<T> **arr) {
     list_inorder_aux(root, arr, 0);
 }
 
+//TODO: where do i use it ?
 /// @brief outside helper method to delete a tree without destructor (used with ptrs)
 /// @tparam T
 /// @return
@@ -546,10 +543,6 @@ Node<T> *TreeNode<T>::get_root() {
     return root;
 }
 
-template<class T>
-void Node<T>::set_key(const T &value) {
-    key = value;
-}
 // -----------------------------------------PRINT METHODS-----------------------------------------
 // TODO: dont forget to delete
 template<class T>
@@ -591,8 +584,6 @@ void TreeNode<T>::inorder(Node<T> *v) {
     inorder(v->right);
 }
 
-
-
 /// @brief helper class to search a movie
 /// @tparam T
 /// @tparam Condition
@@ -616,18 +607,19 @@ Node<T>* TreeNode<T>::findBy(Node<T> * node, Condition condition)
 /// @return 
 template <class T>
 template <class Condition>
-Node<T>* TreeNode<T>::findBy_inside(Node<T> * node, Node<T> *treeRoot, Condition condition)
-{
-    if (treeRoot == NULL) return NULL;
 
-    if (condition(node->get_key(), treeRoot->get_key(), Equality::EQUAL)){
+Node<T>* TreeNode<T>::findBy_inside(Node<T> * node, Node<T> *rootCurrent, Condition condition)
+{
+    if (rootCurrent == NULL) return NULL;
+
+    if (condition(node->get_key(), rootCurrent->get_key(), Equality::EQUAL)){
         return root;
     }
-    else if (condition(node->get_key(), treeRoot->get_key(), Equality::LESS)){
-        return findBy_inside(node,treeRoot->get_right(),condition);
+    else if (condition(node->get_key(), rootCurrent->get_key(), Equality::LESS)){
+        return findBy_inside(node,rootCurrent->get_right(),condition);
     }
     else{
-        return findBy_inside(node,treeRoot->get_left(),condition);
+        return findBy_inside(node,rootCurrent->get_left(),condition);
     }
 }
 
