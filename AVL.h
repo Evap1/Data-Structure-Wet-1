@@ -78,7 +78,7 @@ private:
 
     // additional methods
     Node<T>* insert(Node<T>* node, const T& value);
-    Node<T>* find(Node<T>* v, const T &value);
+    Node<T>* find(Node<T>* v, const T &value) const;
     Node<T>* findMin(Node<T>* v);
     bool find_by_id(int value);
     Node<T>* remove(const T& value, Node<T> *v);
@@ -104,7 +104,7 @@ public:
     StatusType insert(const T& value);
     StatusType remove(const T& value);
     StatusType delete_tree();
-    Node<T>* find(const T& value);
+    Node<T>* find(const T& value) const;
     void list_inorder(Node<T>** arr);
     void print_tree();
     void printBT(const TreeNode& tree);
@@ -213,7 +213,7 @@ int TreeNode<T>::get_balance_factor(Node<T> *v) {
 /// @param value - to find.
 /// @return  - NULL if not found , the ptr to element if found.
 template<class T>
-Node<T>* TreeNode<T>::find(Node<T>* v, const T &value) {
+Node<T>* TreeNode<T>::find(Node<T>* v, const T &value) const {
     if (v == NULL) return NULL;
 
     if (v->key == value){
@@ -470,6 +470,8 @@ StatusType TreeNode<T>::delete_tree(){
 /// @return Status of the operation.
 template<class T>
 StatusType TreeNode<T>::remove(const T &value) {
+    //if (value == NULL) return StatusType::FAILURE;
+
     // removing one element only if exists
     if (find(root, value) != NULL){
         try {
@@ -491,6 +493,8 @@ StatusType TreeNode<T>::remove(const T &value) {
 /// @return Status of the operation.
 template<class T>
 StatusType TreeNode<T>::insert(const T& value) {
+    if (value == NULL) return StatusType::FAILURE;
+
     // inserting one element only if NOT exists
     if (find(root, value) == NULL){
         try {
@@ -510,7 +514,7 @@ StatusType TreeNode<T>::insert(const T& value) {
 /// @param value - to search
 /// @return - NULL if not found , the ptr to element if found.
 template<class T>
-Node<T> *TreeNode<T>::find(const T &value) {
+Node<T> *TreeNode<T>::find(const T &value) const {
     if(value == NULL)
         return NULL;
     return find(root,value);
@@ -598,7 +602,7 @@ Node<T>* TreeNode<T>::findBy(Node<T> * node, Condition condition)
     return findBy_inside(node, root, condition);
 }
 
-//TODO: may cause problems, change root to v (Eva)
+
 /// @brief find the node by using the condition function
 /// @tparam T 
 /// @param node 
@@ -607,7 +611,6 @@ Node<T>* TreeNode<T>::findBy(Node<T> * node, Condition condition)
 /// @return 
 template <class T>
 template <class Condition>
-
 Node<T>* TreeNode<T>::findBy_inside(Node<T> * node, Node<T> *rootCurrent, Condition condition)
 {
     if (rootCurrent == NULL) return NULL;
@@ -616,10 +619,10 @@ Node<T>* TreeNode<T>::findBy_inside(Node<T> * node, Node<T> *rootCurrent, Condit
         return root;
     }
     else if (condition(node->get_key(), rootCurrent->get_key(), Equality::LESS)){
-        return findBy_inside(node,rootCurrent->get_right(),condition);
+        return findBy_inside(node,rootCurrent->get_right_nonConst(),condition);
     }
     else{
-        return findBy_inside(node,rootCurrent->get_left(),condition);
+        return findBy_inside(node,rootCurrent->get_left_nonConst(),condition);
     }
 }
 

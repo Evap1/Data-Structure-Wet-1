@@ -49,7 +49,7 @@ StatusType do_to_all_4_movies_trees(Node<Movie>* node, int rate , FunctionType f
 
     int get_all_movies_inside(const Node<Movie>* moviesRoot, int *const output);
     StatusType insert_to_streamming_trees(const Movie &movie);
-    StatusType do_to_all_4_trees(Node<Movie>* node, int rate , FunctionType function);
+    StatusType do_to_all_4_movies_trees(Node<Movie>* node, int count , FunctionType function)
 
 public:
 	// <DO-NOT-MODIFY> {

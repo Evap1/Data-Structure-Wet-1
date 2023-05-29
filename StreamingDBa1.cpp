@@ -23,7 +23,7 @@ streaming_database::~streaming_database()
 /// @return Status of the operation
 StatusType streaming_database::add_movie(int movieId, Genre genre, int views, bool vipOnly)
 {
-	IdSearch idSearch();
+	IdSearch idSearch;
 
 	if(movieId <= 0 || genre == Genre::NONE ||  views < 0)
 		return StatusType::INVALID_INPUT;
@@ -45,7 +45,7 @@ StatusType streaming_database::remove_movie(int movieId)
 	if(movieId <=0)
 		return StatusType::INVALID_INPUT;
 
-	IdSearch idSearch();
+	IdSearch idSearch;
 	
 	Node<Movie>* temp = new Node<Movie>(Movie(movieId,Genre::NONE,0, false));
 	Node<Movie>* node = moviesByID[(int)Genre::NONE]->findBy(temp, idSearch);
@@ -79,8 +79,15 @@ StatusType streaming_database::remove_user(int userId)
     Node<User>* toRemove = users.find(User(userId));
 
     //TODO: if user is part of group, can't delete
-    if (toRemove->get_key_by_ref()->get_group_id()!= User::NONE){
-        toRemove->get_key_by_ref()->get_group_ptr()->
+    Group* toUpdate = toRemove->get_key_by_ref()->get_group_ptr();
+    if ( toRemove->get_key_by_ref()->get_group_id() != User::NONE){
+        for (int i= 0; i <= (int)Genre::NONE; i++){
+            int userViewsAlone = toRemove->get_key_by_ref()->get_views_per_genre((Genre)i);
+            int userViewsWhenJoin = toRemove->get_key_by_ref()->get_views_when_leave((Genre)i);
+            int totalViewsGroup = toUpdate->get_movies_as_group((Genre)i);
+            int substruct = userViewsAlone + totalViewsGroup - userViewsWhenJoin;
+            toUpdate->set_views((Genre)i, -substruct );
+        }
     }
 	return users.remove(User(userId));
 }
@@ -155,7 +162,7 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
     // find ptr to user to movie. if not found, it's a failure
 
     //TODO: add find by id, in NONE tree.
-	IdSearch idSearch();
+	IdSearch idSearch;
 	Node<Movie>* tempMovieNode = new Node<Movie>(Movie(movieId,Genre::NONE,0, false));
 	tempMovieNode = moviesByID[(int)Genre::NONE]->findBy(tempMovieNode, idSearch);
 	Movie *MovieToUpdate = tempMovieNode->get_key_by_ref();
@@ -335,7 +342,7 @@ StatusType streaming_database::rate_movie(int userId, int movieId, int rating)
     // TODO: why do we need these 2 conditions ? why the 2nd is not enough? (Eva)
 	if(moviesByRateing[(int)Genre::NONE] != NULL && moviesByRateing[(int)Genre::NONE]->get_root() != NULL)
 	{
-		IdSearch idSearch();
+		IdSearch idSearch;
 
         //find movie by rate
 		Node<Movie> *temp = new Node<Movie>(Movie(movieId,Genre::NONE, 0, false));
@@ -434,7 +441,7 @@ StatusType correct_status(StatusType status1,StatusType status2)
 StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int count , FunctionType function)
 {
 
-	IdSearch idSearch();
+	IdSearch idSearch;
 	Node<Movie>* nodeById = moviesByID[(int)Genre::NONE]->findBy(node, idSearch);
 
 	if(node == NULL)
@@ -444,7 +451,7 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
 	switch (function)
 	{
 	case FunctionType::INSERT:
-	{
+	{   //TODO: insert or insertBy
 		status1 = moviesByRateing[(int)node->get_key().getGenre()]->insert(node->get_key());
 		status2 = moviesByRateing[(int)Genre::NONE]->insert(node->get_key());
 		status3 = moviesByID[(int)node->get_key().getGenre()]->insert(node->get_key());

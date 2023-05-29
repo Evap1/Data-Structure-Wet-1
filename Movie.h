@@ -27,7 +27,6 @@ public:
     //friend class IdSearch;
 
     Movie(int id, Genre genreType, int viewsCount, bool isVip);
-    Movie(const Movie& movie) = delete;
     ~Movie() =  default;
 
     int getMovieId() const;

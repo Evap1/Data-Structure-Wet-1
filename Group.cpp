@@ -6,11 +6,11 @@
 
 Group::Group(int id) : groupId(id), isVip(false) {
     members = new TreeNode<User*>();
-    viewsAsGroup = new int[(int)Genre::NONE +1];
+    sumViewsAsGroup = new int[(int)Genre::NONE + 1];
     numOfMoviesWatched = new int[(int)Genre::NONE +1];
 
     for (int i= 0; i <= (int)Genre::NONE; i++){
-        viewsAsGroup[i] = 0;
+        sumViewsAsGroup[i] = 0;
         numOfMoviesWatched[i] = 0;
     }
 }
@@ -20,7 +20,7 @@ Group::~Group() {
     Node<User*>* root = members->get_root();
     empty_group_aux(root);
     delete members;
-    delete[] viewsAsGroup;
+    delete[] sumViewsAsGroup;
     delete[] numOfMoviesWatched;
 }
 
@@ -35,7 +35,7 @@ int Group::get_member_count() {
 /// @param type
 /// @return how many views the current group has, of genre type.
 int Group::get_views_per_genre(Genre type) const {
-    return viewsAsGroup[(int)type];
+    return sumViewsAsGroup[(int)type];
 }
 /// @param type
 /// @return how many movies the current group watched, of genre type.
@@ -57,14 +57,19 @@ int Group::get_id() const {
 /// @brief add to a certain genre num of views as the size of the group, after group watch.
 /// @param type
 void Group::set_views_per_movie(Genre type) {
-    viewsAsGroup[(int)type]+= members->get_counter();
+    sumViewsAsGroup[(int)type]+= members->get_counter();
 }
 
 /// @brief keep track of num of views not as group, when already registered in a group.
 /// @param type
 void Group::set_views_per_movie_user_watch(Genre type) {
-    viewsAsGroup[(int)type]++;
+    sumViewsAsGroup[(int)type]++;
 }
+
+void Group::set_views(Genre genre, int amount){
+    sumViewsAsGroup[(int)genre] += amount;
+}
+
 
 // _________________________________________________OTHER METHODS______________________________________________________________
 
@@ -76,7 +81,7 @@ StatusType Group::add_user(User* member) {
     }
     // add the views per genres each user has watched prior to joining the team.
     for (int i = 0; i <= (int)Genre::NONE; i++){
-        viewsAsGroup[i] += member->get_views_per_genre((Genre)i);
+        sumViewsAsGroup[i] += member->get_views_per_genre((Genre)i);
     }
     // update how many movies the team watched of type genre.
     for (int i = 0; i <= (int)Genre::NONE; i++){

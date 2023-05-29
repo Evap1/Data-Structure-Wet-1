@@ -11,7 +11,7 @@ class Group{
 private:
     int groupId;
     bool isVip;
-    int* viewsAsGroup;
+    int* sumViewsAsGroup;
     int* numOfMoviesWatched;
     //TODO:
     TreeNode<User*>* members;
@@ -32,6 +32,7 @@ public:
     StatusType free_members();
     void set_views_per_movie(Genre type);
     void set_views_per_movie_user_watch(Genre type);
+    void set_views(Genre genre, int amount);
 
 };
 

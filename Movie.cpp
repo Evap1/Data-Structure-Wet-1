@@ -124,15 +124,15 @@ bool operator<(const Movie& movie1, const Movie& movie2)
 
 
 
-// /// @brief check if the movies are equals by their Id
-// /// @param movie1 
-// /// @param movie2 
-// /// @return 
-// bool operator==(const Movie &movie1, const Movie &movie2)
-// {
-//     if(!(movie1>movie2 || movie1<movie2))
-//         return true;
-//     return false;
-// }
+ /// @brief check if the movies are equals by their Id
+ /// @param movie1
+ /// @param movie2
+ /// @return
+ bool operator==(const Movie &movie1, const Movie &movie2)
+ {
+     if(!(movie1>movie2 || movie1<movie2))
+         return true;
+     return false;
+ }
 
 
