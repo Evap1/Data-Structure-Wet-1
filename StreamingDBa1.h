@@ -24,36 +24,27 @@
 
 class streaming_database {
 private:
-	//
-	// Here you may add anything you want
-	//
 
     // None holds the whole tree sorted by : TBD
     TreeNode<Movie>* moviesByRateing[(int)(Genre::NONE)+1];
 	TreeNode<Movie>* moviesByID[(int)(Genre::NONE)+1];
+    //TODO: fill & update bestMovie
+    Node<Movie>* bestMovie[(int)(Genre::NONE)+1];
     TreeNode<User> users;
     TreeNode<Group> groups;
-    static const int EMPTY = -1;
-// Equalitu
-enum struct FunctionType {
-    INSERT           = 0,
-    REMOVE            = 1,
-    RATE_MOVIE           = 2,
-	UPDATE_VIEWS		= 3
-};
 
+    // Equality
+    enum struct FunctionType {
+        INSERT           = 0,
+        REMOVE           = 1,
+        RATE_MOVIE       = 2,
+        UPDATE_VIEWS	 = 3
+    };
 
+    int get_all_movies_inside(const Node<Movie>* moviesRoot, int *const output);
+    StatusType insert_to_streamming_trees(const Movie &movie);
+    StatusType do_to_all_4_trees(Node<Movie>* node, int rate , FunctionType function);
 
-
-int get_all_movies_inside(const Node<Movie>* moviesRoot, int *const output);
-StatusType insert_to_streamming_trees(const Movie &movie);
-StatusType do_to_all_4_trees(Node<Movie>* node, int rate , FunctionType function);
-
-
-
-
-
-	
 public:
 	// <DO-NOT-MODIFY> {
 	

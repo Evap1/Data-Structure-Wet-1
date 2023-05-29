@@ -6,11 +6,22 @@
 
 Group::Group(int id) : groupId(id), isVip(false) {
     members = new TreeNode<User*>();
+    viewsAsGroup = new int[(int)Genre::NONE +1];
+    numOfMoviesWatched = new int[(int)Genre::NONE +1];
+
+    for (int i= 0; i <= (int)Genre::NONE; i++){
+        viewsAsGroup[i] = 0;
+        numOfMoviesWatched[i] = 0;
+    }
 }
 
 /// @brief Destructor uses TreeNode destructor
 Group::~Group() {
+    Node<User*>* root = members->get_root();
+    empty_group_aux(root);
     delete members;
+    delete[] viewsAsGroup;
+    delete[] numOfMoviesWatched;
 }
 
 
@@ -22,9 +33,14 @@ int Group::get_member_count() {
 }
 
 /// @param type
-/// @return how many movies the current user watched, of genre type.
+/// @return how many views the current group has, of genre type.
 int Group::get_views_per_genre(Genre type) const {
     return viewsAsGroup[(int)type];
+}
+/// @param type
+/// @return how many movies the current group watched, of genre type.
+int Group::get_movies_as_group(Genre type) const {
+    return numOfMoviesWatched[(int)type];
 }
 
 /// @return how many users this group has.
@@ -59,9 +75,14 @@ StatusType Group::add_user(User* member) {
         isVip = true;
     }
     // add the views per genres each user has watched prior to joining the team.
-    for (int i = 0; i < (int)Genre::NONE; i++){
-        viewsAsUsers[i] += member->get_views_per_genre((Genre)i);
+    for (int i = 0; i <= (int)Genre::NONE; i++){
+        viewsAsGroup[i] += member->get_views_per_genre((Genre)i);
     }
+    // update how many movies the team watched of type genre.
+    for (int i = 0; i <= (int)Genre::NONE; i++){
+        member->set_views_as_group_join((Genre)i,numOfMoviesWatched[i] );
+    }
+    //TODO: maybe problems with ptr
     member->set_group_ptr(this);
     return members->insert(member);
 }
@@ -72,17 +93,29 @@ StatusType Group::add_user(User* member) {
 void Group::empty_group() {
     Node<User*>* root = members->get_root();
     empty_group_aux(root);
+    delete members;
 }
 
 //TODO: make sure the warning is ok
-/// @brief Recursivly, inorder, change the groupId field in users.
+/// @brief Recursivly, inorder, change the groupId field in users,
 /// @param v - ptr to User* (a.k. node of type User*, so the changes apply in Users tree as well)
-void Group::empty_group_aux(Node<User*>* v) {
+void Group::empty_group_aux( Node<User*>* v) {
     if (v == NULL) return;
 
-    empty_group_aux(v->get_right());
-    v->get_key_to_set()->leave_group();
-    empty_group_aux(v->get_left());
+    // recursive call to left
+    empty_group_aux(v->get_left_nonConst());
+
+    // action on the element
+    for (int i = 0; i <= (int)Genre::NONE; i++){
+        int toAdd = v->get_key_to_set()->get_views_when_leave((Genre)i);
+        v->get_key_to_set()->set_views_as_group_join((Genre)i, toAdd);
+    }
+    v->get_key_to_set()->set_group_id(User::NONE);
+    //TODO: maybe problems with null
+    v->get_key_to_set()->set_group_ptr_null(nullptr);
+
+    // recursive call to right
+    empty_group_aux(v->get_right_nonConst());
 }
 
 StatusType Group::free_members() {
@@ -95,11 +128,6 @@ StatusType Group::free_members() {
     }
     return StatusType::FAILURE;
 }
-
-
-
-
-
 
 
 // ___________________________________________Operator Overloading__________________________________________

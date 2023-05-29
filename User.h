@@ -11,7 +11,8 @@ class User {
 private:
     int userId;
     bool isVip;
-    int viewsPerGenre[(int)Genre::NONE] = {0};
+    int viewsPerGenre[(int)Genre::NONE + 1] = {0};
+    int groupWatchWhenJoin[(int)Genre::NONE + 1]  = {0};
     int groupId;
     Group* group;
 
@@ -21,16 +22,20 @@ public:
 
     void set_group_id(int id);
     void set_group_ptr(Group* other);
+    void set_group_ptr_null(std::nullptr_t); //in case of leaving group
+    void set_views_as_group_join(Genre type, int amount);
 
     int get_user_id() const;
     int get_group_id() const;
     Group* get_group_ptr() const;
     int get_views_per_genre(Genre type) const;
+    int get_views_when_leave(Genre type) const;
 
     void leave_group();
     bool is_vip() const;
     void add_views_in_genre(Genre type);
     static const int NONE = -1;
+
 };
 
 // ___________________________________________Operator Overloading__________________________________________
@@ -38,6 +43,7 @@ public:
 bool operator>(const User &user1, const User &user2);
 bool operator<(const User& user1, const User& user2);
 bool operator==(const User& user1, const User& user2);
+
 
 
 #endif //WET1_USER_H

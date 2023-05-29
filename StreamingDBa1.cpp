@@ -1,5 +1,7 @@
 #include "StreamingDBa1.h"
 #include "AVL.h"
+#include <new>
+
 StatusType correct_status(StatusType status1,StatusType status2);
 
 /// @brief Constructor for an empty streaming database.
@@ -96,6 +98,12 @@ StatusType streaming_database::add_user(int userId, bool isVip)
 StatusType streaming_database::remove_user(int userId)
 {
     if (userId <= 0) return StatusType::INVALID_INPUT;
+    Node<User>* toRemove = users.find(User(userId));
+
+    //TODO: if user is part of group, can't delete
+    if (toRemove->get_key_by_ref()->get_group_id()!= User::NONE){
+        toRemove->get_key_by_ref()->get_group_ptr()->
+    }
 	return users.remove(User(userId));
 }
 
@@ -117,7 +125,12 @@ StatusType streaming_database::remove_group(int groupId)
 {
     if (groupId <= 0) return StatusType::INVALID_INPUT;
     // unassiagn all related users.
-    groups.find(Group(groupId))->get_key_by_ref()->empty_group();
+
+//    // find group in the tree. if not found, it's a failure
+//    Node<Group>* toDelete = groups.find(Group(groupId));
+//    if (toDelete == NULL) return StatusType::FAILURE;
+
+    //toDelete->get_key_by_ref()->empty_group();
     return groups.remove(Group(groupId));
 }
 
@@ -143,10 +156,11 @@ StatusType streaming_database::add_user_to_group(int userId, int groupId)
     if (UserGroup != User::NONE) return StatusType::FAILURE;
     UserToAdd->set_group_id(groupId);
 
-    // add user to the current group tree
+    // add user to the current group tree and fill the movies viewed as group prior to join
     return NodeGroupToUpdate->get_key_to_set().add_user(UserToAdd);
 }
 
+//TODO: galor changes
 /// @brief Update the views of a user per genre of a movie. updates the views as a group, if related to a group O(logn+logk)
 /// @param userId
 /// @param movieId
@@ -160,7 +174,6 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
     if (UserToAdd == NULL) return StatusType::FAILURE;
 
     // find ptr to user to movie. if not found, it's a failure
-    //TODO: add find by id, in NONE tree.
     Movie *MovieToUpdate;
     if (MovieToUpdate == NULL) return StatusType::FAILURE;
 
@@ -170,7 +183,6 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
         return StatusType::FAILURE;
     }
     // case 2: user allowed:
-    // TODO: update the counter in all 4 trees
 
     // update views for user
     UserToAdd->add_views_in_genre(MovieToUpdate->getGenre());
@@ -181,7 +193,6 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
         GroupToAdd->set_views_per_movie_user_watch(MovieToUpdate->getGenre());
     }
 
-    // TODO: calculate the status
     return StatusType::SUCCESS;
 }
 
@@ -287,16 +298,29 @@ output_t<int> streaming_database::get_num_views(int userId, Genre genre)
     // find ptr to user to add. if not found, it's a failure
     User *UserToAdd = users.find(User(userId))->get_key_by_ref();
 
-    // user not found:
+    // case 1: user not found:
     if (UserToAdd == NULL) return StatusType::FAILURE;
+    // case 2: user found:
     int counter = 0;
     if (genre == Genre::NONE){
-        for ( int i = 0; i < (int)Genre::NONE; i++ ){
+        for ( int i = 0; i <= (int)Genre::NONE; i++ ){
+            // current user views per genre
             counter += UserToAdd->get_views_per_genre((Genre)(i));
+            // add user views as group, if assign to group
+            if (UserToAdd->get_group_id()!=User::NONE){
+                counter += UserToAdd->get_group_ptr()->get_movies_as_group((Genre)(i));
+                counter -= UserToAdd->get_views_when_leave((Genre)(i));
+            }
         }
     }
-    else counter = UserToAdd->get_views_per_genre(genre);
-
+    else {
+        counter += UserToAdd->get_views_per_genre(genre);
+        // add user views as group, if assign to group
+        if (UserToAdd->get_group_id()!=User::NONE) {
+            counter += UserToAdd->get_group_ptr()->get_movies_as_group(genre);
+            counter -= UserToAdd->get_views_when_leave(genre);
+        }
+    }
     return {output_t(counter)};
 }
 
@@ -310,7 +334,7 @@ StatusType streaming_database::rate_movie(int userId, int movieId, int rating)
 	if(userId<=0 || movieId <=0 || rating < 0 || rating > 100)
 		return StatusType::INVALID_INPUT;
 	
-	if((users.get_root() != NULL) && (!users.find((User(userId, false)))))
+	if((users.get_root() != nullptr) && (!users.find((User(userId, false)))))
 		return StatusType::FAILURE;
 
     //access the whole tree sorted by rate
@@ -351,7 +375,7 @@ output_t<int> streaming_database::get_group_recommendation(int groupId)
     // find fav genre
     int max = 0;
     Genre favourite = Genre::NONE;
-    for (int i = 0; i < (int)Genre::NONE; i++){
+    for (int i = 0; i <= (int)Genre::NONE; i++){
         int current = GroupToAdd->get_views_per_genre((Genre)i);
         if (current > max ){
             max = current;
@@ -370,8 +394,8 @@ output_t<int> streaming_database::get_group_recommendation(int groupId)
         return {output_t<int>(StatusType::FAILURE)};
     }
 
-    //TODO: return recommended movie by rate->views->movieID using genre favourite;
-
+    int favId = bestMovie[(int)favourite]->get_key_by_ref()->getMovieId();
+    return {output_t(favId)};
 }
 
 
