@@ -12,6 +12,7 @@ private:
     int groupId;
     bool isVip;
     int viewsAsGroup[(int)Genre::NONE] = {0};
+    int viewsAsUsers[(int)Genre::NONE] = {0};
     //TODO:
     TreeNode<User*>* members;
 
@@ -22,11 +23,15 @@ public:
     StatusType add_user(User* member);
     int get_member_count();
     int get_id() const;
+    int get_views_per_genre(Genre type) const;
+
     bool is_vip();
     void empty_group();
     void empty_group_aux(Node<User*>* v);
     StatusType free_members();
     void set_views_per_movie(Genre type);
+    void set_views_per_movie_user_watch(Genre type);
+
 };
 
 // ___________________________________________Operator Overloading__________________________________________

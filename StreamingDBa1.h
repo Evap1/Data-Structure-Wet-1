@@ -22,20 +22,18 @@
 #include "Movie.h"
 
 
-
-
 class streaming_database {
 private:
 	//
 	// Here you may add anything you want
 	//
-	
+
     // None holds the whole tree sorted by : TBD
     TreeNode<Movie>* moviesByRateing[(int)(Genre::NONE)+1];
 	TreeNode<Movie>* moviesByID[(int)(Genre::NONE)+1];
     TreeNode<User> users;
     TreeNode<Group> groups;
-
+    static const int EMPTY = -1;
 // Equalitu
 enum struct FunctionType {
     INSERT           = 0,

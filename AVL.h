@@ -7,6 +7,7 @@
 
 #include<iostream>
 #include "User.h"
+#include "Movie.h"
 
 using namespace std;
 
@@ -31,9 +32,7 @@ public:
 
 
     const T& get_key() {return key;};
-
     const T& get_key() const{return key;};
-    T* get_key_to_set() {return &key;}
 
     const Node<T>* get_left() {return left;};
     const Node<T>* get_left() const {return left;};
@@ -52,11 +51,6 @@ private:
     Node<T>* right;
     int height;
 };
-
-template<class T>
-void Node<T>::set_key(const T &value) {
-    key = value;
-}
 
 // AVL Tree
 template <class T>
@@ -542,6 +536,11 @@ template<class T>
 Node<T> *TreeNode<T>::get_root() {
     return root;
 }
+
+template<class T>
+void Node<T>::set_key(const T &value) {
+    key = value;
+}
 // -----------------------------------------PRINT METHODS-----------------------------------------
 // TODO: dont forget to delete
 template<class T>
@@ -585,7 +584,12 @@ void TreeNode<T>::inorder(Node<T> *v) {
 
 
 
-
+/// @brief helper class to search a movie
+/// @tparam T
+/// @tparam Condition
+/// @param node
+/// @param condition
+/// @return
 template <class T>
 template <class Condition>
 Node<T>* TreeNode<T>::findBy(Node<T> * node, Condition condition)
@@ -594,6 +598,7 @@ Node<T>* TreeNode<T>::findBy(Node<T> * node, Condition condition)
     return findBy_inside(node, root, condition);
 }
 
+//TODO: may cause problems, change root to v (Eva)
 /// @brief find the node by using the condition function
 /// @tparam T 
 /// @param node 
@@ -602,14 +607,14 @@ Node<T>* TreeNode<T>::findBy(Node<T> * node, Condition condition)
 /// @return 
 template <class T>
 template <class Condition>
-Node<T>* TreeNode<T>::findBy_inside(Node<T> * node,Node<T> * root, Condition condition) 
+Node<T>* TreeNode<T>::findBy_inside(Node<T> * node, Node<T> *root, Condition condition)
 {
     if (root == NULL) return NULL;
 
     if (condition(node->get_key(), root->get_key(), Equality::EQUAL)){
         return root;
     }
-    else if (ondition(node->get_key(), root->get_key(), Equality::LESS)){
+    else if (condition(node->get_key(), root->get_key(), Equality::LESS)){
         return findBy_inside(node,root->get_right(),condition);
     }
     else{

@@ -22,7 +22,7 @@ class Movie{
 
 public:
 
-    // friend class IdSearch;
+    //friend class IdSearch;
 
     Movie(int id, Genre genreType, int viewsCount, bool isVip);
     Movie(const Movie& movie) = delete;
@@ -42,8 +42,6 @@ public:
 
 };
 
-
-
 // Equalitu
 enum struct Equality {
     LESS           = 0,
@@ -52,8 +50,6 @@ enum struct Equality {
 };
 
 class IdSearch{
-
-    
     public:
     IdSearch() = default;
     bool operator()(const Movie& movie1, const Movie& movie2, Equality kind) const
