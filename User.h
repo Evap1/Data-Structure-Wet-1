@@ -46,4 +46,22 @@ bool operator==(const User& user1, const User& user2);
 
 
 
+class UserPtrCompare{
+    public:
+    UserPtrCompare() = default;
+    bool operator()(const User* userPtr1, const User* userPtr2, Equality kind) const
+    {
+        
+
+        if(kind == Equality::LESS)
+            return userPtr1->get_user_id() < userPtr2->get_user_id();   
+
+        if(kind == Equality::EQUAL)
+            return userPtr1->get_user_id() == userPtr2->get_user_id();
+
+        if(kind == Equality::GREATER)
+            return userPtr1->get_user_id() > userPtr2->get_user_id();
+    }
+};
+
 #endif //WET1_USER_H

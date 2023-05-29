@@ -17,6 +17,15 @@ using namespace std;
 template <class T>
 class TreeNode;
 
+
+// Equalities:
+enum struct Equality {
+    LESS           = 0,
+    EQUAL            = 1,
+    GREATER           = 2,
+};
+
+
 // Node
 template <class T>
 class Node{
@@ -502,6 +511,8 @@ StatusType TreeNode<T>::insert(const T& value) {
 /// @return - NULL if not found , the ptr to element if found.
 template<class T>
 Node<T> *TreeNode<T>::find(const T &value) {
+    if(value == NULL)
+        return NULL;
     return find(root,value);
 }
 
@@ -596,14 +607,15 @@ Node<T>* TreeNode<T>::findBy(Node<T> * node, Condition condition)
 /// @return 
 template <class T>
 template <class Condition>
+
 Node<T>* TreeNode<T>::findBy_inside(Node<T> * node, Node<T> *rootCurrent, Condition condition)
 {
     if (rootCurrent == NULL) return NULL;
 
-    if (condition(node->get_key(), root->get_key(), Equality::EQUAL)){
-        return rootCurrent;
+    if (condition(node->get_key(), rootCurrent->get_key(), Equality::EQUAL)){
+        return root;
     }
-    else if (condition(node->get_key(), root->get_key(), Equality::LESS)){
+    else if (condition(node->get_key(), rootCurrent->get_key(), Equality::LESS)){
         return findBy_inside(node,rootCurrent->get_right(),condition);
     }
     else{
@@ -620,6 +632,8 @@ template<class T>
 template <class Condition>
 StatusType TreeNode<T>::insertBy(const T& value, Condition condition) {
     // inserting one element only if NOT exists
+    if(value==NULL)
+        return StatusType::FAILURE;
     if (findBy(root, value, condition) == NULL){
         try {
             root = insertBy(root, value, condition);
@@ -641,8 +655,9 @@ StatusType TreeNode<T>::insertBy(const T& value, Condition condition) {
 template<class T>
 template <class Condition>
 Node<T> *TreeNode<T>::insertBy(Node<T>* node, const T& value, Condition condition) {
+    
     if (node == NULL){
-        node = new Node(value);
+        node = new Node<T>(value);
         elementsCount++;
     }
 
