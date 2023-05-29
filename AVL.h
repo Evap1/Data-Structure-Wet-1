@@ -6,8 +6,6 @@
 #define WET1_AVL_H
 
 #include<iostream>
-#include "User.h"
-#include "Movie.h"
 
 using namespace std;
 
@@ -18,6 +16,15 @@ using namespace std;
 // Implementation later on
 template <class T>
 class TreeNode;
+
+
+// Equalities:
+enum struct Equality {
+    LESS           = 0,
+    EQUAL            = 1,
+    GREATER           = 2,
+};
+
 
 // Node
 template <class T>
@@ -507,6 +514,8 @@ StatusType TreeNode<T>::insert(const T& value) {
 /// @return - NULL if not found , the ptr to element if found.
 template<class T>
 Node<T> *TreeNode<T>::find(const T &value) {
+    if(value == NULL)
+        return NULL;
     return find(root,value);
 }
 
@@ -607,18 +616,18 @@ Node<T>* TreeNode<T>::findBy(Node<T> * node, Condition condition)
 /// @return 
 template <class T>
 template <class Condition>
-Node<T>* TreeNode<T>::findBy_inside(Node<T> * node, Node<T> *root, Condition condition)
+Node<T>* TreeNode<T>::findBy_inside(Node<T> * node, Node<T> *treeRoot, Condition condition)
 {
-    if (root == NULL) return NULL;
+    if (treeRoot == NULL) return NULL;
 
-    if (condition(node->get_key(), root->get_key(), Equality::EQUAL)){
+    if (condition(node->get_key(), treeRoot->get_key(), Equality::EQUAL)){
         return root;
     }
-    else if (condition(node->get_key(), root->get_key(), Equality::LESS)){
-        return findBy_inside(node,root->get_right(),condition);
+    else if (condition(node->get_key(), treeRoot->get_key(), Equality::LESS)){
+        return findBy_inside(node,treeRoot->get_right(),condition);
     }
     else{
-        return findBy_inside(node,root->get_left(),condition);
+        return findBy_inside(node,treeRoot->get_left(),condition);
     }
 }
 
@@ -631,6 +640,8 @@ template<class T>
 template <class Condition>
 StatusType TreeNode<T>::insertBy(const T& value, Condition condition) {
     // inserting one element only if NOT exists
+    if(value==NULL)
+        return StatusType::FAILURE;
     if (findBy(root, value, condition) == NULL){
         try {
             root = insertBy(root, value, condition);
@@ -652,8 +663,9 @@ StatusType TreeNode<T>::insertBy(const T& value, Condition condition) {
 template<class T>
 template <class Condition>
 Node<T> *TreeNode<T>::insertBy(Node<T>* node, const T& value, Condition condition) {
+    
     if (node == NULL){
-        node = new Node(value);
+        node = new Node<T>(value);
         elementsCount++;
     }
 

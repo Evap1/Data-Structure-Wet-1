@@ -27,22 +27,28 @@ Movie::Movie(int id, Genre genreType, int viewsCount, bool isVip) :
 
 /// @brief add views to the movie's views count
 /// @param count assume that count is positive
-void Movie::add_views(int count)
+StatusType Movie::add_views(int count)
 {
     if (count >= 0)
+    {
         views += count;
+        return StatusType::SUCCESS;
+    }
+    return StatusType::INVALID_INPUT;
 }
 
 
 /// @brief adds one more user's rating to the movie's rating calculation
 /// @param rate assume that in range 1-100
-void Movie::add_rating(int rated)
+StatusType Movie::add_rating(int rated)
 {
-    if (rated > 0 && rated < 100)
+    if ((rated >= 0) && (rated <= 100))
     {
         rate = (ratersCont * rate + rated) / (ratersCont + 1);
         ratersCont++;
+        return StatusType::SUCCESS;
     }
+    return StatusType::INVALID_INPUT;
 }
 
 /// @brief prints Movie's properties

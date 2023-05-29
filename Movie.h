@@ -4,6 +4,8 @@
 
 #include "wet1util.h"
 #include<iostream>
+#include "AVL.h"
+
 
 class IdSearch;
 
@@ -34,20 +36,15 @@ public:
     int getViews() const;
     double getRate() const;
 
-    void add_views(int count);
-    void add_rating(int rate);
+    StatusType add_views(int count);
+    StatusType add_rating(int rated);
 
     void printMovie() const;
 
 
 };
 
-// Equalitu
-enum struct Equality {
-    LESS           = 0,
-    EQUAL            = 1,
-    GREATER           = 2,
-};
+
 
 class IdSearch{
     public:

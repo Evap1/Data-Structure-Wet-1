@@ -29,25 +29,11 @@ StatusType streaming_database::add_movie(int movieId, Genre genre, int views, bo
 	Node<Movie>* node = new Node<Movie>(Movie(movieId,genre,views, vipOnly));
 	if(moviesByID[(int)Genre::NONE]->findBy(node, idSearch) == NULL)
 	{
-		return insert_to_streamming_trees(node->get_key());
+		return do_to_all_4_movies_trees(node,-1,FunctionType::INSERT);
 	}
 	return StatusType::FAILURE;
 }
 
-/// @brief insert the movie to all 4 trees, private method
-/// @param movie 
-/// @return Status of the operation
-StatusType streaming_database::insert_to_streamming_trees(const Movie &movie)
-{
-	StatusType status1 = moviesByRateing[(int)movie.getGenre()]->insert(movie);
-	StatusType status2 = moviesByRateing[(int)Genre::NONE]->insert(movie);
-	StatusType status3 = moviesByID[(int)movie.getGenre()]->insert(movie);
-	StatusType status4 = moviesByID[(int)Genre::NONE]->insert(movie);
-
-	StatusType ratingStatus = correct_status(status1, status2);
-	StatusType iDStatus = correct_status(status3, status4);
-	return correct_status(ratingStatus, iDStatus);
-}
 
 /// @brief remove a movie from all 4 trees. O(logk)
 /// @param movieId
@@ -63,15 +49,7 @@ StatusType streaming_database::remove_movie(int movieId)
 	Node<Movie>* node = moviesByID[(int)Genre::NONE]->findBy(temp, idSearch);
 	if(node != NULL)
 	{
-		StatusType status1 = moviesByRateing[(int)node->get_key().getGenre()]->remove(node->get_key());
-		StatusType status2 = moviesByRateing[(int)Genre::NONE]->remove(node->get_key());
-		StatusType status3 = moviesByID[(int)node->get_key().getGenre()]->remove(node->get_key());
-		StatusType status4 = moviesByID[(int)Genre::NONE]->remove(node->get_key());
-
-		StatusType ratingStatus = correct_status(status1, status2);
-		StatusType iDStatus = correct_status(status3, status4);
-
-		return correct_status(ratingStatus, iDStatus);
+		return do_to_all_4_movies_trees(node, -1, FunctionType::REMOVE);
 	}
 
 	return StatusType::FAILURE;
@@ -117,7 +95,12 @@ StatusType streaming_database::remove_group(int groupId)
 {
     if (groupId <= 0) return StatusType::INVALID_INPUT;
     // unassiagn all related users.
-    groups.find(Group(groupId))->get_key_by_ref()->empty_group();
+
+    // find group in the tree. if not found, it's a failure
+    Node<Group>* toDelete = groups.find(Group(groupId));
+    if (toDelete == NULL) return StatusType::FAILURE;
+    
+    toDelete->get_key_by_ref()->empty_group();
     return groups.remove(Group(groupId));
 }
 
@@ -161,7 +144,10 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
 
     // find ptr to user to movie. if not found, it's a failure
     //TODO: add find by id, in NONE tree.
-    Movie *MovieToUpdate;
+	IdSearch idSearch();
+	Node<Movie>* tempMovieNode = new Node<Movie>(Movie(movieId,Genre::NONE,0, false));
+	tempMovieNode = moviesByID[(int)Genre::NONE]->findBy(tempMovieNode, idSearch);
+	Movie *MovieToUpdate = tempMovieNode->get_key_by_ref();
     if (MovieToUpdate == NULL) return StatusType::FAILURE;
 
     // check if movie is vip and user allowed to watch
@@ -171,6 +157,9 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
     }
     // case 2: user allowed:
     // TODO: update the counter in all 4 trees
+	StatusType tempStatus = do_to_all_4_movies_trees(tempMovieNode, 1, FunctionType::UPDATE_VIEWS);
+	if(tempStatus != StatusType::SUCCESS)
+		return tempStatus;
 
     // update views for user
     UserToAdd->add_views_in_genre(MovieToUpdate->getGenre());
@@ -209,6 +198,7 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
         return StatusType::FAILURE;
     }
     // TODO: update the counter in all 4 trees
+	
 
     // update views for group
     GroupToAdd->set_views_per_movie(MovieToUpdate->getGenre());
@@ -297,7 +287,7 @@ output_t<int> streaming_database::get_num_views(int userId, Genre genre)
     }
     else counter = UserToAdd->get_views_per_genre(genre);
 
-    return {output_t(counter)};
+    return {output_t<int>(counter)};
 }
 
 /// @brief rate by user, a movie corresponding to an id. setts the average rate. O(logn + logk)
@@ -310,7 +300,8 @@ StatusType streaming_database::rate_movie(int userId, int movieId, int rating)
 	if(userId<=0 || movieId <=0 || rating < 0 || rating > 100)
 		return StatusType::INVALID_INPUT;
 	
-	if((users.get_root() != NULL) && (!users.find((User(userId, false)))))
+	Node<User>* userNode = users.find(User(userId, false));
+	if((users.get_root() != NULL) && (userNode != NULL))
 		return StatusType::FAILURE;
 
     //access the whole tree sorted by rate
@@ -322,11 +313,16 @@ StatusType streaming_database::rate_movie(int userId, int movieId, int rating)
         //find movie by rate
 		Node<Movie> *temp = new Node<Movie>(Movie(movieId,Genre::NONE, 0, false));
 		Node<Movie>* movieNode = moviesByID[(int)Genre::NONE]->findBy(temp, idSearch);
+		delete temp;
+		if(movieNode->get_key().isVipOnly())
+			if(!userNode->get_key().is_vip())
+				return StatusType::FAILURE;
+		
 		if(movieNode != NULL)
 		{
 			///TODO: need to use do_to_all_4_trees !
-			movieNode->get_key_by_ref()->add_rating(rating); // need changes!
-			return StatusType::SUCCESS;
+			// movieNode->get_key_by_ref()->add_rating(rating); // need changes!
+			return do_to_all_4_movies_trees(movieNode, rating,FunctionType::RATE_MOVIE);
 		}
 	}
 	return StatusType::FAILURE;
@@ -398,18 +394,24 @@ StatusType correct_status(StatusType status1,StatusType status2)
 
 }
 
-//TODO: finish this
+
 ///TODO: finish this
-/// @brief NOT FINISHED
-/// @param node 
-/// @param rate 
-/// @param function 
+/// @brief Works by the FunctionType on all of the 4 movie's trees needed:
+/// function == INSERT - insert the movie to all of the trees of its genre and none
+/// function == REMOVE - remove the movie from all of the trees of its genre and none
+/// function == RATE_MOVIE - add rating to the movie in all of his copies in the the trees of its genre and none
+/// @param node the movie to do the function on/with
+/// @param count the movie's rate or vies to add - in use only for RATE_MOVIE and UPDATE_VIEWS
+/// @param function the function type we want to use in this calling of the function
 /// @return 
-StatusType streaming_database::do_to_all_4_trees(Node<Movie>* node, int rate , FunctionType function)
+StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int count , FunctionType function)
 {
 
 	IdSearch idSearch();
 	Node<Movie>* nodeById = moviesByID[(int)Genre::NONE]->findBy(node, idSearch);
+
+	if(node == NULL)
+		return StatusType::INVALID_INPUT;
 
 	StatusType status1,status2,status3,status4;
 	switch (function)
@@ -433,10 +435,25 @@ StatusType streaming_database::do_to_all_4_trees(Node<Movie>* node, int rate , F
 	}
 	case FunctionType::RATE_MOVIE:
 	{
-		status1 = moviesByRateing[(int)node->get_key().getGenre()]->get_root->;
-		status2 = moviesByRateing[(int)Genre::NONE]->remove(node->get_key());
-		status3 = moviesByID[(int)node->get_key().getGenre()]->remove(node->get_key());
-		status4 = moviesByID[(int)Genre::NONE]->remove(node->get_key());
+		if(count < 0 || count >100)
+			return StatusType::INVALID_INPUT;
+
+		status1 = moviesByRateing[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_rating(count);
+		status2 = moviesByRateing[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_rating(count);
+		status3 = moviesByID[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_rating(count);
+		status4 = moviesByID[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_rating(count);
+
+		break;
+	}	
+	case FunctionType::UPDATE_VIEWS:
+	{
+		if(count > 0)
+			return StatusType::INVALID_INPUT;
+
+		status1 = moviesByRateing[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(1);
+		status2 = moviesByRateing[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(1);
+		status3 = moviesByID[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(1);
+		status4 = moviesByID[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(1);
 
 		break;
 	}
