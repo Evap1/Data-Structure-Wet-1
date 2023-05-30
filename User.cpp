@@ -8,7 +8,7 @@
 
 // TODO: Consumer must check if ID already exists
 User::User(int userId, bool isVip) : userId(userId), isVip(isVip) , groupId(NONE), group(NULL) {}
-User::User(int userId): userId(userId), isVip(false), groupId(0), group(NULL){}
+User::User(int userId): userId(userId), isVip(false), groupId(0), group(NULL) {}
 
 
 // _________________________________________________SETTERS______________________________________________________________

@@ -20,11 +20,10 @@
 #include "Group.h"
 #include "User.h"
 #include "Movie.h"
-
+//NOTE: destructor throws exceptions if memory is not freed. need to make sure to caught on main program.
 
 class streaming_database {
 private:
-
     // Equality
     enum struct FunctionType {
         INSERT           = 0,

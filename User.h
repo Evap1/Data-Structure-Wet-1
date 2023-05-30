@@ -6,19 +6,22 @@
 #define WET1_USER_H
 #include "wet1util.h"
 #include "AVL.h"
-#include "Group.h"
+
+class Group;
+
 class User {
 private:
     int userId;
     bool isVip;
-    int viewsPerGenre[(int)Genre::NONE + 1] = {0};
-    int groupWatchWhenJoin[(int)Genre::NONE + 1]  = {0};
+    int viewsPerGenre [(int)Genre::NONE + 1] = {0};
+    int groupWatchWhenJoin [(int)Genre::NONE + 1] = {0};
     int groupId;
     Group* group;
 
 public:
     explicit User(int userId,bool isVip);
     explicit User(int userId);
+    ~User() = default;
 
     void set_group_id(int id);
     void set_group_ptr(Group* other);

@@ -4,17 +4,31 @@
 
 StatusType correct_status(StatusType status1,StatusType status2);
 
+//TODO: may cause problems with new and mempry dealing. users.
 /// @brief Constructor for an empty streaming database.
-streaming_database::streaming_database()
+// no need to free elements alloced before, not dynamiclly.
+streaming_database::streaming_database() : users(TreeNode<User>()), groups(TreeNode<Group>())
 {
-
+    for (int i= 0; i <= (int)Genre::NONE; i++){
+        moviesByRateing[i] = new TreeNode<Movie>();
+        moviesByID[i] = new TreeNode<Movie>();
+        bestMovie[i] = nullptr;
+    }
 }
 
+/// dont forget to catch status allocation error if failed
 /// @brief Release all memory. O(n+k+m)
 streaming_database::~streaming_database()
 {
-	// TODO: Your code goes here
+    for (int i= 0; i <= (int)Genre::NONE; i++){
+		delete moviesByRateing[i];
+		delete moviesByID[i];
+		if (bestMovie[i] != nullptr){
+			delete bestMovie[i];
+		}
+    }
 }
+
 /// @brief add movie by id to all 4 trees. O(logk)
 /// @param movieId
 /// @param genre
@@ -42,6 +56,8 @@ StatusType streaming_database::add_movie(int movieId, Genre genre, int views, bo
 /// @return Status of the operation
 StatusType streaming_database::remove_movie(int movieId)
 {
+	try{
+		
 	if(movieId <=0)
 		return StatusType::INVALID_INPUT;
 
@@ -51,13 +67,17 @@ StatusType streaming_database::remove_movie(int movieId)
 	Node<Movie>* node = moviesByID[(int)Genre::NONE]->findBy(temp, idSearch);
 	if(node != NULL)
 	{
-		return do_to_all_4_movies_trees(node, -1, FunctionType::REMOVE);
-	}
 
+        return do_to_all_4_movies_trees(node, -1, FunctionType::REMOVE);
+	}
 	return StatusType::FAILURE;
 
+	}
+	catch(...)
+	{
+		return StatusType::ALLOCATION_ERROR;
+	}
 	/// TODO: need to create a function that can find a movie by its id only!
-	// TODO: Your code goes here
 }
 
 /// @brief add new user to users tree. O(logn)
@@ -116,7 +136,6 @@ StatusType streaming_database::remove_group(int groupId)
 //    if (toDelete == NULL) return StatusType::FAILURE;
 
     //toDelete->get_key_by_ref()->empty_group();
-
     return groups.remove(Group(groupId));
 }
 
@@ -180,7 +199,6 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
 	StatusType tempStatus = do_to_all_4_movies_trees(tempMovieNode, 1, FunctionType::UPDATE_VIEWS);
 	if(tempStatus != StatusType::SUCCESS)
 		return tempStatus;
-
 
     // update views for user
     UserToAdd->add_views_in_genre(MovieToUpdate->getGenre());

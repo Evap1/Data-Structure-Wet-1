@@ -7,17 +7,17 @@
 #include "wet1util.h"
 #include "User.h"
 #include "AVL.h"
+//TODO: make sure < > = operator for  user* !!!
+
 class Group{
 private:
     int groupId;
     bool isVip;
-    int* sumViewsAsGroup;
-    int* numOfMoviesWatched;
-    //TODO:
+    int sumViewsAsGroup [(int)Genre::NONE + 1] = {0};
+    int numOfMoviesWatched [(int)Genre::NONE + 1] = {0};
     TreeNode<User*>* members;
 
 public:
-    // TODO: destructor
     explicit Group(int id);
     ~Group();
     StatusType add_user(User* member);
@@ -27,7 +27,6 @@ public:
     int get_movies_as_group(Genre type) const;
 
     bool is_vip();
-    void empty_group();
     void empty_group_aux(  Node<User*>* v);
     StatusType free_members();
     void set_views_per_movie(Genre type);
