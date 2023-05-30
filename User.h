@@ -6,7 +6,8 @@
 #define WET1_USER_H
 #include "wet1util.h"
 #include "AVL.h"
-#include "Group.h"
+
+class Group;
 
 class User {
 private:
