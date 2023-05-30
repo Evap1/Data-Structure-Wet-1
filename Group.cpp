@@ -6,28 +6,26 @@
 
 Group::Group(int id) : groupId(id), isVip(false) {
     members = new TreeNode<User*>();
-    sumViewsAsGroup = new int[(int)Genre::NONE + 1];
-    numOfMoviesWatched = new int[(int)Genre::NONE +1];
-
-    for (int i= 0; i <= (int)Genre::NONE; i++){
-        sumViewsAsGroup[i] = 0;
-        numOfMoviesWatched[i] = 0;
-    }
 }
 
 /// @brief Destructor uses TreeNode destructor
 Group::~Group() {
     Node<User*>* root = members->get_root();
     empty_group_aux(root);
-    delete members;
-    delete[] sumViewsAsGroup;
-    delete[] numOfMoviesWatched;
+    try {
+        delete members;
+    }
+    catch (...){
+        throw StatusType::ALLOCATION_ERROR;
+    }
 }
+
 
 
 // _________________________________________________GETTERS______________________________________________________________
 
 /// @return how many users this group has.
+//TODO: if do problems, change with simple counter
 int Group::get_member_count() {
     return members->get_counter();
 }
@@ -90,15 +88,6 @@ StatusType Group::add_user(User* member) {
     //TODO: maybe problems with ptr
     member->set_group_ptr(this);
     return members->insert(member);
-}
-
-
-/// @brief Changes all users assigned to this group, groupId to User::NONE,
-/// no need to know users, root or so.
-void Group::empty_group() {
-    Node<User*>* root = members->get_root();
-    empty_group_aux(root);
-    delete members;
 }
 
 //TODO: make sure the warning is ok

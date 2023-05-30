@@ -12,6 +12,7 @@ using namespace std;
 //TODO: test this whole thing
 //TODO: DELETE PRINT FUNCTIONS
 // TODO: should we put ptr to key
+// NOTE: all exceptions are caught with insert and remove.
 
 // Implementation later on
 template <class T>
@@ -157,7 +158,12 @@ void TreeNode<T>::delete_tree(Node<T> *v) {
     }
     delete_tree(v->left);
     delete_tree(v->right);
-    delete v;
+    try {
+        delete v;
+    }
+    catch (...){
+        throw StatusType::ALLOCATION_ERROR;
+    }
 }
 
 
@@ -331,6 +337,7 @@ Node<T>* TreeNode<T>::remove(const T& value, Node<T> *v) {
         }
         //TODO: is there a way to determine if delete didnt work?
         delete temp;
+
     }
 
     //in case v is the last on any subtree;
