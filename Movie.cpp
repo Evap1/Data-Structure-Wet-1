@@ -15,8 +15,9 @@
 /// @param viewsCount movies views till now
 /// @param isVip is the movie for vip's only?
 Movie::Movie(int id, Genre genreType, int viewsCount, bool isVip) : 
-    movieId(id), genre(genreType), views(viewsCount), vipOnly(isVip)
+    movieId(id), genre(genreType), vipOnly(isVip)
 {
+    views = viewsCount;
     rate = 0;
     ratersCont = 0;
 }

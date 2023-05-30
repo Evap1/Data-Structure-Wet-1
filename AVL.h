@@ -14,7 +14,6 @@ using namespace std;
 //TODO: DELETE PRINT FUNCTIONS
 // TODO: should we put ptr to key
 // NOTE: all exceptions are caught with insert and remove.
-
 // Implementation later on
 template <class T>
 class TreeNode;
@@ -93,6 +92,7 @@ private:
     Node<T>* findBy_inside(Node<T> * node,Node<T> * root, Condition condition);
 
 
+
 public:
     TreeNode();
     ~TreeNode();
@@ -118,7 +118,6 @@ public:
     template <class Condition>
     Node<T>* insertBy(Node<T>* node, const T& value, Condition condition);
 };
-
 // -----------------------------------------PRIVATE METHODS----------------------------------------
 
 /// @brief Node operator= overload
@@ -168,6 +167,7 @@ void TreeNode<T>::delete_tree(Node<T> *v) {
 }
 
 
+
 /// @brief updating the height of node v. dealing with possibility that we are too low in the tree
 /// @tparam T - class type of the node.
 /// @param v - node to update
@@ -181,7 +181,13 @@ void TreeNode<T>::updateHeight(Node<T>* v) {
     else if (v->right == NULL){
         v->height = v->left->height + 1;
     }
-    else v->height = 1 + max(v->left->height, v->right->height);
+    else{
+        int maxHight =v->right->height;
+        if(v->left->height > v->right->height)
+            maxHight = v->left->height;
+        v->height = 1 + maxHight;
+    } 
+        
 }
 
 /// @brief Get the balance factor of a node
@@ -422,12 +428,7 @@ Node<T>* TreeNode<T>::right_rotate(Node<T> *B) {
     return A;
 }
 
-/// @param a
-/// @param b
-/// @return the greater integer
-int max(int a, int b){
-    return a > b ? a : b ;
-}
+
 
 /// @brief recursive helper for the outward method. PRIVATE
 /// @tparam T

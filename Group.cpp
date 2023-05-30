@@ -8,16 +8,13 @@ Group::Group(int id) : groupId(id), isVip(false) {
     members = new TreeNode<User*>();
 }
 
+
 /// @brief Destructor uses TreeNode destructor
 Group::~Group() {
     Node<User*>* root = members->get_root();
     empty_group_aux(root);
-    try {
         delete members;
-    }
-    catch (...){
-        throw StatusType::ALLOCATION_ERROR;
-    }
+
 }
 
 

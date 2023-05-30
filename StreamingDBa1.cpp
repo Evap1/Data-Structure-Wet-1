@@ -465,7 +465,7 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
 {
 
 	IdSearch idSearch;
-	Node<Movie>* nodeById = moviesByID[(int)Genre::NONE]->findBy(node, idSearch);
+	// Node<Movie>* nodeById = moviesByID[(int)Genre::NONE]->findBy(node, idSearch);
 
 	if(node == NULL)
 		return StatusType::INVALID_INPUT;
