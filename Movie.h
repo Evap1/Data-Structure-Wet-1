@@ -6,9 +6,7 @@
 #include<iostream>
 #include "AVL.h"
 
-
 class IdSearch;
-
 
 
 class Movie{
@@ -60,8 +58,9 @@ class IdSearch{
         if(kind == Equality::EQUAL)
             return movie1.getMovieId() == movie2.getMovieId();
 
-        if(kind == Equality::GREATER)
+        //if(kind == Equality::GREATER)
             return movie1.getMovieId() > movie2.getMovieId();
+            
     }
 };
 
