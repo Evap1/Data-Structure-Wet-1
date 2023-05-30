@@ -464,7 +464,7 @@ StatusType correct_status(StatusType status1,StatusType status2)
 StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int count , FunctionType function)
 {
 
-	IdSearch idSearch;
+	//IdSearch idSearch;
 	// Node<Movie>* nodeById = moviesByID[(int)Genre::NONE]->findBy(node, idSearch);
 
 	if(node == NULL)

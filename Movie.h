@@ -59,7 +59,7 @@ class IdSearch{
             return movie1.getMovieId() == movie2.getMovieId();
 
         //if(kind == Equality::GREATER)
-            return movie1.getMovieId() > movie2.getMovieId();
+        return movie1.getMovieId() > movie2.getMovieId();
             
     }
 };

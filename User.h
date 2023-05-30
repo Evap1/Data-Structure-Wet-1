@@ -62,8 +62,7 @@ class UserPtrCompare{
         if(kind == Equality::EQUAL)
             return userPtr1->get_user_id() == userPtr2->get_user_id();
 
-        if(kind == Equality::GREATER)
-            return userPtr1->get_user_id() > userPtr2->get_user_id();
+        return userPtr1->get_user_id() > userPtr2->get_user_id();
     }
 };
 
