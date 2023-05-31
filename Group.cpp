@@ -11,7 +11,7 @@ Group::Group(int id) : groupId(id), isVip(false) {
 
 /// @brief Destructor uses TreeNode destructor
 Group::~Group() {
-    if (members != NULL){
+    if (members != NULL && members->get_counter()>0){
         Node<User*>* root = members->get_root();
         empty_group_aux(root);
         delete members;
@@ -69,7 +69,8 @@ void Group::set_views(Genre genre, int amount){
 
 /// @brief add new user to a group
 /// @param member
-StatusType Group::add_user(User* member) {
+template <class Condition>
+StatusType Group::add_user(User* member, Condition condition) {
     if (member->is_vip()){
         isVip = true;
     }
@@ -83,7 +84,7 @@ StatusType Group::add_user(User* member) {
     }
     //TODO: maybe problems with ptr
     member->set_group_ptr(this);
-    return members->insert(member);
+    return members->insertBy(member, condition);
 }
 
 //TODO: make sure the warning is ok

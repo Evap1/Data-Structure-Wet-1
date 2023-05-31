@@ -20,7 +20,9 @@ private:
 public:
     explicit Group(int id);
     ~Group();
-    StatusType add_user(User* member);
+
+    template<class Condition>
+    StatusType add_user(User *member, Condition condition);
     int get_member_count();
     int get_id() const;
     int get_views_per_genre(Genre type) const;
