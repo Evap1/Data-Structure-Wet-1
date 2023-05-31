@@ -51,6 +51,9 @@ public:
     const Node<T>* get_right() {return right;};
     const Node<T>* get_right() const {return right;};
 
+    int get_hight() const {return height;};
+
+
 private:
     T key;
     Node<T>* left;
@@ -83,7 +86,6 @@ private:
     Node<T>* findMin(Node<T>* v);
     bool find_by_id(int value);
     Node<T>* remove(const T& value, Node<T> *v);
-    void delete_tree(Node<T>* v);
     void inorder(Node<T>* v);
     int list_inorder_aux( Node<T>* v, Node<T> **arr, int index);
     void printBT(const std::string& prefix, const Node<T>* node, bool isLeft);
@@ -92,10 +94,11 @@ private:
     Node<T>* findBy_inside(Node<T> * node,Node<T> * root, Condition condition);
 
 
-
+///TODO: delete the function print treeBT
 public:
     TreeNode();
     ~TreeNode();
+    void delete_tree(Node<T>* v);
 
     // Getters
     int get_height();
@@ -175,6 +178,7 @@ template<class T>
 void TreeNode<T>::updateHeight(Node<T>* v) {
     if (v->left == NULL){
         if (v->right == NULL){
+            v->height= 0; 
         }
         else v->height = v->right->height + 1;
     }
@@ -356,6 +360,7 @@ Node<T>* TreeNode<T>::remove(const T& value, Node<T> *v) {
 
     //rotations if needed, from bottom -> up:
     v = balance_Tree(v);
+    updateHeight(v);
     return v;
 }
 
