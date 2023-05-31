@@ -51,6 +51,9 @@ public:
     const Node<T>* get_right() {return right;};
     const Node<T>* get_right() const {return right;};
 
+    int get_hight() const {return height;};
+
+
 private:
     T key;
     Node<T>* left;
@@ -80,10 +83,10 @@ private:
     // additional methods
     Node<T>* insert(Node<T>* node, const T& value);
     Node<T>* find(Node<T>* v, const T &value) const;
-    Node<T>* findMin(Node<T>* v);
+    Node<T>* findMin(Node<T>* v) const;
+    Node<T>* findMaxAux (Node<T>* v) const;
     bool find_by_id(int value);
     Node<T>* remove(const T& value, Node<T> *v);
-    void delete_tree(Node<T>* v);
     void inorder(Node<T>* v);
     int list_inorder_aux( Node<T>* v, Node<T> **arr, int index);
     void printBT(const std::string& prefix, const Node<T>* node, bool isLeft);
@@ -96,6 +99,7 @@ private:
 public:
     TreeNode();
     ~TreeNode();
+    void delete_tree(Node<T>* v);
 
     // Getters
     int get_height();
@@ -107,6 +111,7 @@ public:
     StatusType remove(const T& value);
     StatusType delete_tree();
     Node<T>* find(const T& value) const;
+    Node<T>* findMax () const;
     void list_inorder(Node<T>** arr);
     void print_tree();
     void printBT(const TreeNode& tree);
@@ -289,12 +294,33 @@ Node<T>* TreeNode<T>::balance_Tree(Node<T>* node)
      return node;
 }
 
+/// @brief Find max value IN THE WHOLE TREE and return it's node.
+/// @tparam T
+/// @param v
+/// @return max node inth e whole tree
+template<class T>
+Node<T>* TreeNode<T>::findMax() const{
+    return findMaxAux(root);
+}
+
+/// @brief helper for findMax method
+/// @tparam T
+/// @param v - accessed with root
+/// @return max node in the subtrees of v
+template<class T>
+Node<T>* TreeNode<T>::findMaxAux(Node<T> *v) const{
+    if (v->right == NULL){
+        return v;
+    }
+    return v->right;
+}
+
 /// @brief Find min value and return it's node.
 /// @tparam T
 /// @param v
 /// @return min node in the subtrees of v
 template<class T>
-Node<T>* TreeNode<T>::findMin(Node<T> *v) {
+Node<T>* TreeNode<T>::findMin(Node<T> *v) const{
     if ( v == NULL){
         return NULL;
     }

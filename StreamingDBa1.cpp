@@ -367,7 +367,6 @@ StatusType streaming_database::rate_movie(int userId, int movieId, int rating)
 		return StatusType::FAILURE;
 
     //access the whole tree sorted by rate
-    // TODO: why do we need these 2 conditions ? why the 2nd is not enough? (Eva)
 	if(moviesByRateing[(int)Genre::NONE] != NULL && moviesByRateing[(int)Genre::NONE]->get_root() != NULL)
 	{
 		IdSearch idSearch;
@@ -525,6 +524,11 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
             default:
                 break;
         }
+
+        //update best movie;
+        Genre toUpdate = node->get_key().getGenre();
+        bestMovie[(int) node->get_key().getGenre()] = moviesByRateing[(int)toUpdate]->findMax();
+        bestMovie[(int)node->get_key().getGenre()] = moviesByRateing[(int)Genre::NONE]->findMax();
 
         StatusType ratingStatus = correct_status(status1, status2);
         StatusType iDStatus = correct_status(status3, status4);
