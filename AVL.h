@@ -51,9 +51,6 @@ public:
     const Node<T>* get_right() {return right;};
     const Node<T>* get_right() const {return right;};
 
-    int get_hight() const {return height;};
-
-
 private:
     T key;
     Node<T>* left;
@@ -86,6 +83,7 @@ private:
     Node<T>* findMin(Node<T>* v);
     bool find_by_id(int value);
     Node<T>* remove(const T& value, Node<T> *v);
+    void delete_tree(Node<T>* v);
     void inorder(Node<T>* v);
     int list_inorder_aux( Node<T>* v, Node<T> **arr, int index);
     void printBT(const std::string& prefix, const Node<T>* node, bool isLeft);
@@ -94,11 +92,10 @@ private:
     Node<T>* findBy_inside(Node<T> * node,Node<T> * root, Condition condition);
 
 
-///TODO: delete the function print treeBT
+
 public:
     TreeNode();
     ~TreeNode();
-    void delete_tree(Node<T>* v);
 
     // Getters
     int get_height();
@@ -178,7 +175,7 @@ template<class T>
 void TreeNode<T>::updateHeight(Node<T>* v) {
     if (v->left == NULL){
         if (v->right == NULL){
-            v->height= 0; 
+            v->height=0;
         }
         else v->height = v->right->height + 1;
     }
@@ -254,13 +251,14 @@ Node<T> *TreeNode<T>::insert(Node<T>* node, const T& value) {
         node = new Node<T>(value);
         elementsCount++;
     }
+    else{
+        if (node->key < value){
+            node->right = insert(node->right, value);
+        }
 
-    if (node->key < value){
-        node->right = insert(node->right, value);
-    }
-
-    if (node->key > value){
-        node->left = insert(node->left, value);
+        if (node->key > value){
+            node->left = insert(node->left, value);
+        }
     }
 
     node = balance_Tree(node);
@@ -340,14 +338,18 @@ Node<T>* TreeNode<T>::remove(const T& value, Node<T> *v) {
     // case3.2: element is found with one or none subtrees
     else {
         temp = v;
-        if (v->left == NULL){
+        if (v->right == NULL && v->left == NULL){
+            delete temp;
+        }
+        else if (v->left == NULL){
             v = v->right;
+            delete temp;
         }
         else if (v->right == NULL){
             v = v->left;
+            delete temp;
         }
         //TODO: is there a way to determine if delete didnt work?
-        delete temp;
 
     }
 
@@ -360,7 +362,6 @@ Node<T>* TreeNode<T>::remove(const T& value, Node<T> *v) {
 
     //rotations if needed, from bottom -> up:
     v = balance_Tree(v);
-    updateHeight(v);
     return v;
 }
 

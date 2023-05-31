@@ -11,13 +11,12 @@ Group::Group(int id) : groupId(id), isVip(false) {
 
 /// @brief Destructor uses TreeNode destructor
 Group::~Group() {
-    Node<User*>* root = members->get_root();
-    empty_group_aux(root);
+    if (members != NULL){
+        Node<User*>* root = members->get_root();
+        empty_group_aux(root);
         delete members;
-
+    }
 }
-
-
 
 // _________________________________________________GETTERS______________________________________________________________
 

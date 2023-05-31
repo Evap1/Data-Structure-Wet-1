@@ -57,27 +57,25 @@ StatusType streaming_database::add_movie(int movieId, Genre genre, int views, bo
 StatusType streaming_database::remove_movie(int movieId)
 {
 	try{
-		
-	if(movieId <=0)
-		return StatusType::INVALID_INPUT;
+        if(movieId <=0)
+            return StatusType::INVALID_INPUT;
 
-	IdSearch idSearch;
-	
-	Node<Movie>* temp = new Node<Movie>(Movie(movieId,Genre::NONE,0, false));
-	Node<Movie>* node = moviesByID[(int)Genre::NONE]->findBy(temp, idSearch);
-	if(node != NULL)
-	{
+        IdSearch idSearch;
 
-        return do_to_all_4_movies_trees(node, -1, FunctionType::REMOVE);
-	}
-	return StatusType::FAILURE;
-
+        Node<Movie>* temp = new Node<Movie>(Movie(movieId,Genre::NONE,0, false));
+        Node<Movie>* node = moviesByID[(int)Genre::NONE]->findBy(temp, idSearch);
+        if(node != NULL)
+        {
+            delete temp;
+            return do_to_all_4_movies_trees(node, -1, FunctionType::REMOVE);
+        }
+        delete temp;
+        return StatusType::FAILURE;
 	}
 	catch(...)
 	{
 		return StatusType::ALLOCATION_ERROR;
 	}
-	/// TODO: need to create a function that can find a movie by its id only!
 }
 
 /// @brief add new user to users tree. O(logn)
@@ -184,22 +182,26 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
 	IdSearch idSearch;
 	Node<Movie>* tempMovieNode = new Node<Movie>(Movie(movieId,Genre::NONE,0, false));
 	tempMovieNode = moviesByID[(int)Genre::NONE]->findBy(tempMovieNode, idSearch);
-	Movie *MovieToUpdate = tempMovieNode->get_key_by_ref();
+    // movie not found
+    if (tempMovieNode == NULL) {
+        return StatusType::FAILURE;
+    }
 
-    if (MovieToUpdate == NULL) return StatusType::FAILURE;
+	Movie *MovieToUpdate = tempMovieNode->get_key_by_ref();
 
     // check if movie is vip and user allowed to watch
     // case 1: user not allowed:
     if (MovieToUpdate->isVipOnly() && !UserToAdd->is_vip()) {
+        delete tempMovieNode;
         return StatusType::FAILURE;
     }
+
     // case 2: user allowed:
-
-    // TODO: update the counter in all 4 trees
 	StatusType tempStatus = do_to_all_4_movies_trees(tempMovieNode, 1, FunctionType::UPDATE_VIEWS);
-	if(tempStatus != StatusType::SUCCESS)
-		return tempStatus;
-
+	if(tempStatus != StatusType::SUCCESS){
+        delete tempMovieNode;
+        return tempStatus;
+    }
     // update views for user
     UserToAdd->add_views_in_genre(MovieToUpdate->getGenre());
 
@@ -208,7 +210,7 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
         Group* GroupToAdd = UserToAdd->get_group_ptr();
         GroupToAdd->set_views_per_movie_user_watch(MovieToUpdate->getGenre());
     }
-
+    delete tempMovieNode;
     return StatusType::SUCCESS;
 }
 
@@ -230,13 +232,15 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
     IdSearch idSearch;
 	Node<Movie>* tempMovieNode = new Node<Movie>(Movie(movieId,Genre::NONE,0, false));
 	tempMovieNode = moviesByID[(int)Genre::NONE]->findBy(tempMovieNode, idSearch);
+    if (tempMovieNode == NULL) {
+        return StatusType::FAILURE;
+    }
 	Movie *MovieToUpdate = tempMovieNode->get_key_by_ref();
-
-    if (MovieToUpdate == NULL) return StatusType::FAILURE;
 
     // check if movie is vip and user allowed to watch
     // user not allowed
     if (MovieToUpdate->isVipOnly() && !GroupToAdd->is_vip()) {
+        delete tempMovieNode;
         return StatusType::FAILURE;
     }
     // TODO: update the counter in all 4 trees
@@ -247,6 +251,7 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
     GroupToAdd->set_views_per_movie(MovieToUpdate->getGenre());
 
     // TODO: calculate the status
+    delete tempMovieNode;
     return StatusType::SUCCESS;
 }
 
@@ -469,59 +474,66 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
 
 	if(node == NULL)
 		return StatusType::INVALID_INPUT;
+    try {
+        StatusType status1, status2, status3, status4;
+        switch (function) {
+            case FunctionType::INSERT: {   //TODO: insert or insertBy
+                status1 = moviesByRateing[(int) node->get_key().getGenre()]->insert(node->get_key());
+                status2 = moviesByRateing[(int) Genre::NONE]->insert(node->get_key());
+                status3 = moviesByID[(int) node->get_key().getGenre()]->insert(node->get_key());
+                status4 = moviesByID[(int) Genre::NONE]->insert(node->get_key());
+                break;
+            }
+            case FunctionType::REMOVE: {
+                status1 = moviesByRateing[(int) node->get_key().getGenre()]->remove(node->get_key());
+                status2 = moviesByRateing[(int) Genre::NONE]->remove(node->get_key());
+                status3 = moviesByID[(int) node->get_key().getGenre()]->remove(node->get_key());
+                status4 = moviesByID[(int) Genre::NONE]->remove(node->get_key());
 
-	StatusType status1,status2,status3,status4;
-	switch (function)
-	{
-	case FunctionType::INSERT:
-	{   //TODO: insert or insertBy
-		status1 = moviesByRateing[(int)node->get_key().getGenre()]->insert(node->get_key());
-		status2 = moviesByRateing[(int)Genre::NONE]->insert(node->get_key());
-		status3 = moviesByID[(int)node->get_key().getGenre()]->insert(node->get_key());
-		status4 = moviesByID[(int)Genre::NONE]->insert(node->get_key());
-		break;
-	}
-	case FunctionType::REMOVE:
-	{
-		status1 = moviesByRateing[(int)node->get_key().getGenre()]->remove(node->get_key());
-		status2 = moviesByRateing[(int)Genre::NONE]->remove(node->get_key());
-		status3 = moviesByID[(int)node->get_key().getGenre()]->remove(node->get_key());
-		status4 = moviesByID[(int)Genre::NONE]->remove(node->get_key());
+                break;
+            }
+            case FunctionType::RATE_MOVIE: {
+                if (count < 0 || count > 100)
+                    return StatusType::INVALID_INPUT;
 
-		break;
-	}
-	case FunctionType::RATE_MOVIE:
-	{
-		if(count < 0 || count >100)
-			return StatusType::INVALID_INPUT;
+                status1 = moviesByRateing[(int) node->get_key().getGenre()]->find(
+                        node->get_key())->get_key_by_ref()->add_rating(count);
+                status2 = moviesByRateing[(int) node->get_key().getGenre()]->find(
+                        node->get_key())->get_key_by_ref()->add_rating(count);
+                status3 = moviesByID[(int) node->get_key().getGenre()]->find(
+                        node->get_key())->get_key_by_ref()->add_rating(count);
+                status4 = moviesByID[(int) node->get_key().getGenre()]->find(
+                        node->get_key())->get_key_by_ref()->add_rating(count);
 
-		status1 = moviesByRateing[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_rating(count);
-		status2 = moviesByRateing[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_rating(count);
-		status3 = moviesByID[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_rating(count);
-		status4 = moviesByID[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_rating(count);
+                break;
+            }
+            case FunctionType::UPDATE_VIEWS: {
+                if (count > 0)
+                    return StatusType::INVALID_INPUT;
 
-		break;
-	}	
-	case FunctionType::UPDATE_VIEWS:
-	{
-		if(count > 0)
-			return StatusType::INVALID_INPUT;
+                status1 = moviesByRateing[(int) node->get_key().getGenre()]->find(
+                        node->get_key())->get_key_by_ref()->add_views(count);
+                status2 = moviesByRateing[(int) node->get_key().getGenre()]->find(
+                        node->get_key())->get_key_by_ref()->add_views(count);
+                status3 = moviesByID[(int) node->get_key().getGenre()]->find(
+                        node->get_key())->get_key_by_ref()->add_views(count);
+                status4 = moviesByID[(int) node->get_key().getGenre()]->find(
+                        node->get_key())->get_key_by_ref()->add_views(count);
 
-		status1 = moviesByRateing[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(count);
-		status2 = moviesByRateing[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(count);
-		status3 = moviesByID[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(count);
-		status4 = moviesByID[(int)node->get_key().getGenre()]->find(node->get_key())->get_key_by_ref()->add_views(count);
+                break;
+            }
+            default:
+                break;
+        }
 
-		break;
-	}
-	default:
-		break;
-	}
+        StatusType ratingStatus = correct_status(status1, status2);
+        StatusType iDStatus = correct_status(status3, status4);
 
-		StatusType ratingStatus = correct_status(status1, status2);
-		StatusType iDStatus = correct_status(status3, status4);
-
-		return correct_status(ratingStatus, iDStatus);
+        return correct_status(ratingStatus, iDStatus);
+    }
+    catch (...){
+        return StatusType::ALLOCATION_ERROR;
+    }
 }
 
 
