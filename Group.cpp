@@ -11,7 +11,7 @@ Group::Group(int id) : groupId(id), isVip(false) {
 
 /// @brief Destructor uses TreeNode destructor
 Group::~Group() {
-    if (members != NULL){
+    if (members != NULL && members->get_counter()>0){
         Node<User*>* root = members->get_root();
         empty_group_aux(root);
         delete members;
@@ -83,7 +83,8 @@ StatusType Group::add_user(User* member) {
     }
     //TODO: maybe problems with ptr
     member->set_group_ptr(this);
-    return members->insert(member);
+    UserPtrCompare ptrCmp;
+    return members->insertBy(member,ptrCmp );
 }
 
 //TODO: make sure the warning is ok

@@ -25,7 +25,7 @@ public:
     int get_id() const;
     int get_views_per_genre(Genre type) const;
     int get_movies_as_group(Genre type) const;
-
+    TreeNode<User*> get_members() {return *members; };
     bool is_vip();
     void empty_group_aux(  Node<User*>* v);
     StatusType free_members();
