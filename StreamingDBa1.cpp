@@ -43,7 +43,7 @@ StatusType streaming_database::add_movie(int movieId, Genre genre, int views, bo
 		return StatusType::INVALID_INPUT;
 
 	Node<Movie>* node = new Node<Movie>(Movie(movieId,genre,views, vipOnly));
-	if(moviesByID[(int)Genre::NONE]->findBy(node, idSearch) == NULL)
+	if(moviesByID[(int)Genre::NONE]->findBy(node->get_key(), idSearch) == NULL)
 	{
 		return do_to_all_4_movies_trees(node,-1,FunctionType::INSERT);
 	}
@@ -63,7 +63,7 @@ StatusType streaming_database::remove_movie(int movieId)
         IdSearch idSearch;
 
         Node<Movie>* temp = new Node<Movie>(Movie(movieId,Genre::NONE,0, false));
-        Node<Movie>* node = moviesByID[(int)Genre::NONE]->findBy(temp, idSearch);
+        Node<Movie>* node = moviesByID[(int)Genre::NONE]->findBy(temp->get_key(), idSearch);
         if(node != NULL)
         {
             delete temp;
@@ -105,6 +105,8 @@ StatusType streaming_database::remove_user(int userId)
             int totalViewsGroup = toUpdate->get_movies_as_group((Genre)i);
             int substruct = userViewsAlone + totalViewsGroup - userViewsWhenJoin;
             toUpdate->set_views((Genre)i, -substruct );
+            UserPtrCompare ptrCompare;
+            toUpdate->getMembers()->removeBy(toRemove->get_key(), ptrCompare);
         }
     }
 	return users.remove(User(userId));
@@ -159,8 +161,9 @@ StatusType streaming_database::add_user_to_group(int userId, int groupId)
     if (UserGroup != User::NONE) return StatusType::FAILURE;
     UserToAdd->set_group_id(groupId);
 
+    UserPtrCompare ptrCompare;
     // add user to the current group tree and fill the movies viewed as group prior to join
-    return NodeGroupToUpdate->get_key_to_set().add_user(UserToAdd);
+    return NodeGroupToUpdate->get_key_to_set().add_user(UserToAdd, ptrCompare);
 }
 
 //TODO: galor changes
@@ -181,7 +184,7 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
     //TODO: add find by id, in NONE tree.
 	IdSearch idSearch;
 	Node<Movie>* tempMovieNode = new Node<Movie>(Movie(movieId,Genre::NONE,0, false));
-	tempMovieNode = moviesByID[(int)Genre::NONE]->findBy(tempMovieNode, idSearch);
+	tempMovieNode = moviesByID[(int)Genre::NONE]->findBy(tempMovieNode->get_key(), idSearch);
     // movie not found
     if (tempMovieNode == NULL) {
         return StatusType::FAILURE;
@@ -231,7 +234,7 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
     //TODO: add find by id, in NONE tree.
     IdSearch idSearch;
 	Node<Movie>* tempMovieNode = new Node<Movie>(Movie(movieId,Genre::NONE,0, false));
-	tempMovieNode = moviesByID[(int)Genre::NONE]->findBy(tempMovieNode, idSearch);
+	tempMovieNode = moviesByID[(int)Genre::NONE]->findBy(tempMovieNode->get_key(), idSearch);
     if (tempMovieNode == NULL) {
         return StatusType::FAILURE;
     }
@@ -367,14 +370,13 @@ StatusType streaming_database::rate_movie(int userId, int movieId, int rating)
 		return StatusType::FAILURE;
 
     //access the whole tree sorted by rate
-    // TODO: why do we need these 2 conditions ? why the 2nd is not enough? (Eva)
 	if(moviesByRateing[(int)Genre::NONE] != NULL && moviesByRateing[(int)Genre::NONE]->get_root() != NULL)
 	{
 		IdSearch idSearch;
 
         //find movie by rate
 		Node<Movie> *temp = new Node<Movie>(Movie(movieId,Genre::NONE, 0, false));
-		Node<Movie>* movieNode = moviesByID[(int)Genre::NONE]->findBy(temp, idSearch);
+		Node<Movie>* movieNode = moviesByID[(int)Genre::NONE]->findBy(temp->get_key(), idSearch);
 		delete temp;
 		if(movieNode->get_key().isVipOnly())
 			if(!userNode->get_key().is_vip())
@@ -525,6 +527,11 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
             default:
                 break;
         }
+
+        //update best movie;
+        Genre toUpdate = node->get_key().getGenre();
+        bestMovie[(int) node->get_key().getGenre()] = moviesByRateing[(int)toUpdate]->findMax();
+        bestMovie[(int)node->get_key().getGenre()] = moviesByRateing[(int)Genre::NONE]->findMax();
 
         StatusType ratingStatus = correct_status(status1, status2);
         StatusType iDStatus = correct_status(status3, status4);

@@ -51,6 +51,9 @@ public:
     const Node<T>* get_right() {return right;};
     const Node<T>* get_right() const {return right;};
 
+    int get_hight() const {return height;};
+
+
 private:
     T key;
     Node<T>* left;
@@ -80,22 +83,28 @@ private:
     // additional methods
     Node<T>* insert(Node<T>* node, const T& value);
     Node<T>* find(Node<T>* v, const T &value) const;
-    Node<T>* findMin(Node<T>* v);
+    Node<T>* findMin(Node<T>* v) const;
+    Node<T>* findMaxAux (Node<T>* v) const;
     bool find_by_id(int value);
     Node<T>* remove(const T& value, Node<T> *v);
-    void delete_tree(Node<T>* v);
     void inorder(Node<T>* v);
     int list_inorder_aux( Node<T>* v, Node<T> **arr, int index);
     void printBT(const std::string& prefix, const Node<T>* node, bool isLeft);
 
     template <class Condition>
-    Node<T>* findBy_inside(Node<T> * node,Node<T> * root, Condition condition);
+    Node<T>* findBy_inside(const T& value, Node<T> *rootCurrent, Condition condition);
 
+    template <class Condition>
+    Node<T>* insertBy(Node<T>* node, const T& value, Condition condition);
+
+    template <class Condition>
+    Node<T>* TreeNode<T>::removeBy(Node<T> *v,const T& value, Condition condition);
 
 
 public:
     TreeNode();
     ~TreeNode();
+    void delete_tree(Node<T>* v);
 
     // Getters
     int get_height();
@@ -107,16 +116,21 @@ public:
     StatusType remove(const T& value);
     StatusType delete_tree();
     Node<T>* find(const T& value) const;
+    Node<T>* findMax () const;
     void list_inorder(Node<T>** arr);
     void print_tree();
     void printBT(const TreeNode& tree);
 
     template <class Condition>
-    Node<T>* findBy(Node<T> * node, Condition condition);
+    Node<T>* findBy(const T& value, Condition condition);
+
     template <class Condition>
     StatusType insertBy(const T& value, Condition condition);
+
     template <class Condition>
-    Node<T>* insertBy(Node<T>* node, const T& value, Condition condition);
+    StatusType TreeNode<T>::removeBy(const T &value, Condition condition);
+
+    
 };
 // -----------------------------------------PRIVATE METHODS----------------------------------------
 
@@ -289,12 +303,33 @@ Node<T>* TreeNode<T>::balance_Tree(Node<T>* node)
      return node;
 }
 
+/// @brief Find max value IN THE WHOLE TREE and return it's node.
+/// @tparam T
+/// @param v
+/// @return max node inth e whole tree
+template<class T>
+Node<T>* TreeNode<T>::findMax() const{
+    return findMaxAux(root);
+}
+
+/// @brief helper for findMax method
+/// @tparam T
+/// @param v - accessed with root
+/// @return max node in the subtrees of v
+template<class T>
+Node<T>* TreeNode<T>::findMaxAux(Node<T> *v) const{
+    if (v->right == NULL){
+        return v;
+    }
+    return v->right;
+}
+
 /// @brief Find min value and return it's node.
 /// @tparam T
 /// @param v
 /// @return min node in the subtrees of v
 template<class T>
-Node<T>* TreeNode<T>::findMin(Node<T> *v) {
+Node<T>* TreeNode<T>::findMin(Node<T> *v) const{
     if ( v == NULL){
         return NULL;
     }
@@ -611,10 +646,10 @@ void TreeNode<T>::inorder(Node<T> *v) {
 /// @return
 template <class T>
 template <class Condition>
-Node<T>* TreeNode<T>::findBy(Node<T> * node, Condition condition)
+Node<T>* TreeNode<T>::findBy(const T& value, Condition condition)
 {
-    if (node == NULL) return NULL;
-    return findBy_inside(node, root, condition);
+    if (value == NULL || elementsCount>0) return NULL;
+    return findBy_inside(value, root, condition);
 }
 
 
@@ -626,18 +661,18 @@ Node<T>* TreeNode<T>::findBy(Node<T> * node, Condition condition)
 /// @return 
 template <class T>
 template <class Condition>
-Node<T>* TreeNode<T>::findBy_inside(Node<T> * node, Node<T> *rootCurrent, Condition condition)
+Node<T>* TreeNode<T>::findBy_inside(const T& value, Node<T> *rootCurrent, Condition condition)
 {
     if (rootCurrent == NULL) return NULL;
 
-    if (condition(node->get_key(), rootCurrent->get_key(), Equality::EQUAL)){
+    if (condition(value, rootCurrent->get_key(), Equality::EQUAL)){
         return root;
     }
-    else if (condition(node->get_key(), rootCurrent->get_key(), Equality::LESS)){
-        return findBy_inside(node,rootCurrent->get_right_nonConst(),condition);
+    else if (condition(value, rootCurrent->get_key(), Equality::LESS)){
+        return findBy_inside(value,rootCurrent->get_right_nonConst(),condition);
     }
     else{
-        return findBy_inside(node,rootCurrent->get_left_nonConst(),condition);
+        return findBy_inside(value,rootCurrent->get_left_nonConst(),condition);
     }
 }
 
@@ -652,7 +687,7 @@ StatusType TreeNode<T>::insertBy(const T& value, Condition condition) {
     // inserting one element only if NOT exists
     if(value==NULL)
         return StatusType::FAILURE;
-    if (findBy(root, value, condition) == NULL){
+    if (findBy(value, condition) == NULL){
         try {
             root = insertBy(root, value, condition);
         }
@@ -691,6 +726,99 @@ Node<T> *TreeNode<T>::insertBy(Node<T>* node, const T& value, Condition conditio
     updateHeight(node);
     return node;
 }
+
+
+
+
+
+/// @brief remove one element with a value.
+/// @tparam T -class type
+/// @param value - to be removed
+/// @return Status of the operation.
+template<class T>
+template <class Condition>
+StatusType TreeNode<T>::removeBy(const T &value, Condition condition) {
+    //if (value == NULL) return StatusType::FAILURE;
+
+    // removing one element only if exists
+    if (findBy(value, condition) != NULL){
+        try {
+            root = removeBy(value,root, condition);
+        }
+        catch(...){
+            return StatusType::ALLOCATION_ERROR;
+        }
+        elementsCount--;
+        return StatusType::SUCCESS;
+    }
+    // value not found:
+    return StatusType::FAILURE;
+}
+
+
+
+// Delete a node and re-balance the tree - all the way to the root.
+template<class T>
+template <class Condition>
+Node<T>* TreeNode<T>::removeBy(Node<T> *v,const T& value, Condition condition) {
+    Node<T>* temp;
+
+    // if value not found, remove returns NULL.
+    if (v == NULL){
+        return NULL;
+    }
+
+    // binary search for the element. ALL CASES ONLY FOR FOUND ELEMENT
+    // case1: value to be found is smaller than current value
+    else if (condition( value , v->key,Equality::LESS )){
+        v->left = removeBy(value, v->left,condition);
+    }
+    // case2: value to be found is greater than current value
+    else if (condition( value , v->key,Equality::GREATER )){
+        v->right = removeBy(value, v->right, condition);
+    }
+    // case3.1: element is found with two subtrees, we make copies and "roll" until
+    //  we reach the level of a leaf. and make deletion the the last else.
+    else if (v->left != NULL && v->right != NULL){
+        //find the new head of the right subtree
+        temp = findMin(v->right);
+        //copy the min element in right subtree
+        v->key = temp->key;
+        //delete other(!) element which we have just copied.
+        v->right = removeBy(v->key, v->right,condition);
+    }
+    // case3.2: element is found with one or none subtrees
+    else {
+        temp = v;
+        if (v->right == NULL && v->left == NULL){
+            delete temp;
+        }
+        else if (v->left == NULL){
+            v = v->right;
+            delete temp;
+        }
+        else if (v->right == NULL){
+            v = v->left;
+            delete temp;
+        }
+        //TODO: is there a way to determine if delete didnt work?
+
+    }
+
+    //in case v is the last on any subtree;
+    if ( v == NULL ){
+        return v;
+    }
+    //update new heights:
+    updateHeight(v);
+
+    //rotations if needed, from bottom -> up:
+    v = balance_Tree(v);
+    return v;
+}
+
+
+
 
 
 
