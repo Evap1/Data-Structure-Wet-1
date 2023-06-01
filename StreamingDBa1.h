@@ -10,11 +10,14 @@
 // DO NOT erase or modify the signatures of the public methods.
 // DO NOT modify the preprocessors in this file.
 // DO NOT use the preprocessors in your other code files.
-// 
+//
+
+
 
 #ifndef STREAMINGDBA1_H_
 #define STREAMINGDBA1_H_
 
+#include <memory>
 #include "wet1util.h"
 #include "AVL.h"
 #include "Group.h"

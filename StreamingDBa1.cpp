@@ -1,6 +1,7 @@
 #include "StreamingDBa1.h"
 #include "AVL.h"
 #include <new>
+#include <memory>
 
 StatusType correct_status(StatusType status1,StatusType status2);
 
@@ -9,8 +10,11 @@ StatusType correct_status(StatusType status1,StatusType status2);
 // no need to free elements alloced before, not dynamiclly.
 streaming_database::streaming_database()
 {
-    usersPtr = make_unique<TreeNode<User>>(TreeNode<User>());
-    groupsPtr = make_unique<TreeNode<Group>>(TreeNode<Group>());
+    usersPtr = std::unique_ptr<TreeNode<User>>(new TreeNode<User>());
+    groupsPtr = std::unique_ptr<TreeNode<Group>>(new TreeNode<Group>());
+
+    //usersPtr = std::make_unique<TreeNode<User>>(TreeNode<User>());
+//    groupsPtr = std::make_unique<TreeNode<Group>>(TreeNode<Group>());
     users = *usersPtr;
     groups = *groupsPtr;
 
@@ -113,9 +117,13 @@ StatusType streaming_database::remove_user(int userId)
             int totalViewsGroup = toUpdate->get_movies_as_group((Genre)i);
             int substruct = userViewsAlone + totalViewsGroup - userViewsWhenJoin;
             toUpdate->set_views((Genre)i, -substruct );
-            UserPtrCompare ptrCompare;
-            toUpdate->get_members()->removeBy(toRemove->get_key_by_ref(), ptrCompare);
+
         }
+        if(toRemove->get_key_by_ref()->is_vip())
+            toUpdate->remove_vip();
+
+        UserPtrCompare ptrCompare;
+        toUpdate->get_members()->removeBy(toRemove->get_key_by_ref(), ptrCompare);
     }
 	return users.remove(User(userId));
 }
@@ -276,12 +284,15 @@ output_t<int> streaming_database::get_all_movies_count(Genre genre)
 
 	if(moviesByRateing[(int)genre] != NULL && moviesByRateing[(int)genre]->get_root() != NULL)
     {
-		output_t<int>* temp = new output_t<int>(moviesByRateing[(int)genre]->get_counter());
-			return *temp;
+//		output_t<int>* temp = new output_t<int>(moviesByRateing[(int)genre]->get_counter());
+//			return *temp;
+        return {output_t<int>(moviesByRateing[(int)genre]->get_counter())};
+
 
     }
-	output_t<int>* temp = new output_t<int>(0);
-	return *temp;
+//	output_t<int>* temp = new output_t<int>(0);
+//	return *temp;
+    return {output_t<int>(0)};
 }
 
 /// @brief fill array with movie ids by desired genre. ordered by rate. O(k (genre))
@@ -483,8 +494,9 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
 
 	//IdSearch idSearch;
 	// Node<Movie>* nodeById = moviesByID[(int)Genre::NONE]->findBy(node, idSearch);
+    Genre genreToUpdate = node->get_key().getGenre();
 
-	if(node == NULL)
+    if(node == NULL)
 		return StatusType::INVALID_INPUT;
     try {
         StatusType status1, status2, status3, status4;
@@ -497,6 +509,8 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
                 break;
             }
             case FunctionType::REMOVE: {
+                // pay attention that node is a pinter to a movie node from the tree: moviesByID[NONE]
+                // so it will be deleted when this node is deleted at theis tree
                 status1 = moviesByRateing[(int) node->get_key().getGenre()]->remove(node->get_key());
                 status2 = moviesByRateing[(int) Genre::NONE]->remove(node->get_key());
                 status3 = moviesByID[(int) node->get_key().getGenre()]->remove(node->get_key());
@@ -539,9 +553,8 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
         }
 
         //update best movie;
-        Genre toUpdate = node->get_key().getGenre();
-        bestMovie[(int) node->get_key().getGenre()] = moviesByRateing[(int)toUpdate]->findMax();
-        bestMovie[(int)node->get_key().getGenre()] = moviesByRateing[(int)Genre::NONE]->findMax();
+        bestMovie[(int) genreToUpdate] = moviesByRateing[(int)genreToUpdate]->findMax();
+        bestMovie[(int) genreToUpdate] = moviesByRateing[(int)Genre::NONE]->findMax();
 
         StatusType ratingStatus = correct_status(status1, status2);
         StatusType iDStatus = correct_status(status3, status4);

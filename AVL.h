@@ -40,7 +40,7 @@ public:
 
     const T& get_key() {return key;};
     const T& get_key() const{return key;};
-    T get_key_to_set() {return key ;};
+    T& get_key_to_set() {return key ;};
     T* get_key_by_ref() {return &key ;};
 
     Node<T>* get_left_nonConst() {return left;};
@@ -274,7 +274,7 @@ Node<T> *TreeNode<T>::insert(Node<T>* node, const T& value) {
             node->left = insert(node->left, value);
         }
     }
-
+    updateHeight(node);
     node = balance_Tree(node);
     updateHeight(node);
     return node;
@@ -309,6 +309,8 @@ Node<T>* TreeNode<T>::balance_Tree(Node<T>* node)
 /// @return max node inth e whole tree
 template<class T>
 Node<T>* TreeNode<T>::findMax() const{
+    if(root == NULL || elementsCount <= 0)
+        return NULL;
     return findMaxAux(root);
 }
 
@@ -318,10 +320,11 @@ Node<T>* TreeNode<T>::findMax() const{
 /// @return max node in the subtrees of v
 template<class T>
 Node<T>* TreeNode<T>::findMaxAux(Node<T> *v) const{
+    if(v==NULL) return NULL;
     if (v->right == NULL){
         return v;
     }
-    return v->right;
+    return findMaxAux(v->right);
 }
 
 /// @brief Find min value and return it's node.
@@ -398,6 +401,8 @@ Node<T>* TreeNode<T>::remove(const T& value, Node<T> *v) {
 
     //rotations if needed, from bottom -> up:
     v = balance_Tree(v);
+    updateHeight(v);
+
     return v;
 }
 
@@ -522,7 +527,11 @@ StatusType TreeNode<T>::delete_tree(){
 template<class T>
 StatusType TreeNode<T>::remove(const T &value) {
     //if (value == NULL) return StatusType::FAILURE;
-
+    if(elementsCount == 0)
+    {
+        root = NULL;
+        return StatusType::FAILURE;
+    }
     // removing one element only if exists
     if (find(root, value) != NULL){
         try {
@@ -564,7 +573,8 @@ StatusType TreeNode<T>::insert(const T& value) {
         try {
             root = new Node<T>(value);
             elementsCount++;
-            return StatusType::ALLOCATION_ERROR;
+            updateHeight(root);
+            return StatusType::SUCCESS;
         }
         catch (...)
         {
@@ -664,7 +674,7 @@ template <class T>
 template <class Condition>
 Node<T>* TreeNode<T>::findBy(const T& value, Condition condition)
 {
-    if (elementsCount>0) return NULL;
+    if (elementsCount<=0) return NULL;
     return findBy_inside(value, root, condition);
 }
 
@@ -684,7 +694,7 @@ Node<T>* TreeNode<T>::findBy_inside(const T& value, Node<T> *rootCurrent, Condit
     if (condition(value, rootCurrent->get_key(), Equality::EQUAL)){
         return rootCurrent;
     }
-    else if (condition(value, rootCurrent->get_key(), Equality::LESS)){
+    else if (condition(value, rootCurrent->get_key(), Equality::GREATER)){
         return findBy_inside(value,rootCurrent->get_right_nonConst(),condition);
     }
     else{
@@ -721,6 +731,7 @@ StatusType TreeNode<T>::insertBy(const T& value, Condition condition) {
         try {
             root = new Node<T>(value);
             elementsCount++;
+            updateHeight(root);
             return StatusType::SUCCESS;
         }
         catch (...)
@@ -755,6 +766,7 @@ Node<T> *TreeNode<T>::insertBy(Node<T>* node, const T& value, Condition conditio
         node->left = insertBy(node->left, value, condition);
     }
 
+    updateHeight(node);
     node = balance_Tree(node);
     updateHeight(node);
     return node;
@@ -772,7 +784,11 @@ template<class T>
 template <class Condition>
 StatusType TreeNode<T>::removeBy(const T &value, Condition condition) {
     //if (value == NULL) return StatusType::FAILURE;
-
+    if(elementsCount == 0)
+    {
+        root = NULL;
+        return StatusType::FAILURE;
+    }
     // removing one element only if exists
     if (findBy(value, condition) != NULL){
         try {
@@ -825,6 +841,7 @@ Node<T>* TreeNode<T>::removeBy_inside(Node<T> *currentRoot,const T& value, Condi
         temp = currentRoot;
         if (currentRoot->right == NULL && currentRoot->left == NULL){
             delete temp;
+            return NULL;
         }
         else if (currentRoot->left == NULL){
             currentRoot = currentRoot->right;
@@ -847,6 +864,7 @@ Node<T>* TreeNode<T>::removeBy_inside(Node<T> *currentRoot,const T& value, Condi
 
     //rotations if needed, from bottom -> up:
     currentRoot = balance_Tree(currentRoot);
+    updateHeight(currentRoot);
     return currentRoot;
 }
 

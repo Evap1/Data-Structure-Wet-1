@@ -6,16 +6,17 @@
 
 Group::Group(int id) : groupId(id), isVip(false) {
     members = new TreeNode<User*>();
+    numOfVIP =0;
 }
 
 
 /// @brief Destructor uses TreeNode destructor
 Group::~Group() {
-    if (members != NULL && members->get_counter()>0){
+    if (members->get_root() != NULL && members->get_counter()>0){
         Node<User*>* root = members->get_root();
         empty_group_aux(root);
-        delete members;
     }
+    delete members;
 }
 
 // _________________________________________________GETTERS______________________________________________________________
@@ -72,6 +73,7 @@ void Group::set_views(Genre genre, int amount){
 StatusType Group::add_user(User* member, UserPtrCompare ptrCompare) {
     if (member->is_vip()){
         isVip = true;
+        numOfVIP++;
     }
     // add the views per genres each user has watched prior to joining the team.
     for (int i = 0; i <= (int)Genre::NONE; i++){
@@ -118,6 +120,14 @@ StatusType Group::free_members() {
     }
     return StatusType::FAILURE;
 }
+
+void Group::remove_vip()
+{
+    numOfVIP--;
+    if(numOfVIP==0)
+        isVip = false;
+}
+
 
 
 // ___________________________________________Operator Overloading__________________________________________

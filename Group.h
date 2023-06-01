@@ -13,6 +13,7 @@ class Group{
 private:
     int groupId;
     bool isVip;
+    int numOfVIP;
     int sumViewsAsGroup [(int)Genre::NONE + 1] = {0};
     int numOfMoviesWatched [(int)Genre::NONE + 1] = {0};
     TreeNode<User*>* members;
@@ -33,6 +34,7 @@ public:
     void set_views_per_movie(Genre type);
     void set_views_per_movie_user_watch(Genre type);
     void set_views(Genre genre, int amount);
+    void remove_vip();
 
 };
 
