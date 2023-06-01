@@ -21,7 +21,7 @@ Group::~Group() {
 // _________________________________________________GETTERS______________________________________________________________
 
 /// @return how many users this group has.
-//TODO: if do problems, change with simple counter
+//TODO: if do problems, change with simple counter.
 int Group::get_member_count() {
     return members->get_counter();
 }

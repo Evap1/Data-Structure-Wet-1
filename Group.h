@@ -7,7 +7,7 @@
 #include "wet1util.h"
 #include "User.h"
 #include "AVL.h"
-//TODO: make sure < > = operator for  user* !!!
+//TODO: make sure < > = operator for  user* !!!!
 
 class Group{
 private:

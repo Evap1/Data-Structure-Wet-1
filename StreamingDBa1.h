@@ -36,7 +36,7 @@ private:
     // None holds the whole tree sorted by : TBD
     TreeNode<Movie>* moviesByRateing[(int)(Genre::NONE)+1];
 	TreeNode<Movie>* moviesByID[(int)(Genre::NONE)+1];
-    //TODO: fill & update bestMovie
+    //TODO: fill & update bestMovie.
     Node<Movie>* bestMovie[(int)(Genre::NONE)+1];
     TreeNode<User> users;
     TreeNode<Group> groups;

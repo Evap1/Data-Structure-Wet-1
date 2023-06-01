@@ -12,7 +12,7 @@ using namespace std;
 
 //TODO: test this whole thing
 //TODO: DELETE PRINT FUNCTIONS
-// TODO: should we put ptr to key
+
 // NOTE: all exceptions are caught with insert and remove.
 // Implementation later on
 template <class T>
@@ -375,6 +375,7 @@ Node<T>* TreeNode<T>::remove(const T& value, Node<T> *v) {
         temp = v;
         if (v->right == NULL && v->left == NULL){
             delete temp;
+            return NULL;
         }
         else if (v->left == NULL){
             v = v->right;
@@ -546,14 +547,29 @@ StatusType TreeNode<T>::insert(const T& value) {
     //if (value == nullptr) return StatusType::FAILURE;
 
     // inserting one element only if NOT exists
-    if (find(root, value) == NULL){
-        try {
-            root = insert(root, value);
+    if(elementsCount > 0)
+    {
+        if (find(root, value) == NULL){
+            try {
+                root = insert(root, value);
+            }
+            catch (const std::bad_alloc&){
+                return StatusType::ALLOCATION_ERROR;
+            }
+            return StatusType::SUCCESS;
         }
-        catch (const std::bad_alloc&){
+    }
+    else
+    {
+        try {
+            root = new Node<T>(value);
+            elementsCount++;
             return StatusType::ALLOCATION_ERROR;
         }
-        return StatusType::SUCCESS;
+        catch (...)
+        {
+            return StatusType::ALLOCATION_ERROR;
+        }
     }
     // already exists
     return StatusType::FAILURE;
@@ -656,7 +672,7 @@ Node<T>* TreeNode<T>::findBy(const T& value, Condition condition)
 /// @brief find the node by using the condition function
 /// @tparam T 
 /// @param node 
-/// @param root 
+/// @param rootCurrent
 /// @param condition 
 /// @return 
 template <class T>
@@ -666,7 +682,7 @@ Node<T>* TreeNode<T>::findBy_inside(const T& value, Node<T> *rootCurrent, Condit
     if (rootCurrent == NULL) return NULL;
 
     if (condition(value, rootCurrent->get_key(), Equality::EQUAL)){
-        return root;
+        return rootCurrent;
     }
     else if (condition(value, rootCurrent->get_key(), Equality::LESS)){
         return findBy_inside(value,rootCurrent->get_right_nonConst(),condition);
@@ -685,17 +701,34 @@ template<class T>
 template <class Condition>
 StatusType TreeNode<T>::insertBy(const T& value, Condition condition) {
     // inserting one element only if NOT exists
+    //TODO: may cause issues
     if(value==NULL)
         return StatusType::FAILURE;
-    if (findBy(value, condition) == NULL){
-        try {
-            root = insertBy(root, value, condition);
+    if(elementsCount >0)
+    {
+        if (findBy(value, condition) == NULL){
+            try {
+                root = insertBy(root, value, condition);
+            }
+            catch (const std::bad_alloc&){
+                return StatusType::ALLOCATION_ERROR;
+            }
+            return StatusType::SUCCESS;
         }
-        catch (const std::bad_alloc&){
+    }
+    else
+    {
+        try {
+            root = new Node<T>(value);
+            elementsCount++;
             return StatusType::ALLOCATION_ERROR;
         }
-        return StatusType::SUCCESS;
+        catch (...)
+        {
+            return StatusType::ALLOCATION_ERROR;
+        }
     }
+
     // already exists
     return StatusType::FAILURE;
 }

@@ -13,7 +13,7 @@
 /// @param id Consumer must check if ID already exists
 /// @param genreType movie's Genre
 /// @param viewsCount movies views till now
-/// @param isVip is the movie for vip's only?
+/// @param isVip is the movie for vip's only??
 Movie::Movie(int id, Genre genreType, int viewsCount, bool isVip) : 
     movieId(id), genre(genreType), vipOnly(isVip)
 {

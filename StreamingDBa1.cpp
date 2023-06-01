@@ -4,7 +4,7 @@
 
 StatusType correct_status(StatusType status1,StatusType status2);
 
-//TODO: may cause problems with new and mempry dealing. users.
+//TODO: may cause problems with new and mempry dealing. users..
 /// @brief Constructor for an empty streaming database.
 // no need to free elements alloced before, not dynamiclly.
 streaming_database::streaming_database() : users(TreeNode<User>()), groups(TreeNode<Group>())
