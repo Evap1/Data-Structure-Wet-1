@@ -40,7 +40,8 @@ private:
     Node<Movie>* bestMovie[(int)(Genre::NONE)+1];
     TreeNode<User> users;
     TreeNode<Group> groups;
-
+    unique_ptr<TreeNode<User>> usersPtr;
+    unique_ptr<TreeNode<Group>> groupsPtr;
 
 int get_all_movies_inside(const Node<Movie>* moviesRoot, int *const output);
 StatusType do_to_all_4_movies_trees(Node<Movie>* node, int rate , FunctionType function);

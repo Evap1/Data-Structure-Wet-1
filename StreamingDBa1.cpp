@@ -7,8 +7,13 @@ StatusType correct_status(StatusType status1,StatusType status2);
 //TODO: may cause problems with new and mempry dealing. users..
 /// @brief Constructor for an empty streaming database.
 // no need to free elements alloced before, not dynamiclly.
-streaming_database::streaming_database() : users(TreeNode<User>()), groups(TreeNode<Group>())
+streaming_database::streaming_database()
 {
+    usersPtr = make_unique<TreeNode<User>>(TreeNode<User>());
+    groupsPtr = make_unique<TreeNode<Group>>(TreeNode<Group>());
+    users = *usersPtr;
+    groups = *groupsPtr;
+
     for (int i= 0; i <= (int)Genre::NONE; i++){
         moviesByRateing[i] = new TreeNode<Movie>();
         moviesByID[i] = new TreeNode<Movie>();
@@ -23,10 +28,13 @@ streaming_database::~streaming_database()
     for (int i= 0; i <= (int)Genre::NONE; i++){
 		delete moviesByRateing[i];
 		delete moviesByID[i];
-		if (bestMovie[i] != nullptr){
-			delete bestMovie[i];
-		}
+//		if (bestMovie[i] != nullptr){
+//			delete bestMovie[i];
+//		}
     }
+    //deleted and their info as they are unique ptrs
+//    delete groupsPtr;
+//    delete usersPtr;
 }
 
 /// @brief add movie by id to all 4 trees. O(logk)
@@ -163,7 +171,9 @@ StatusType streaming_database::add_user_to_group(int userId, int groupId)
 
     UserPtrCompare ptrCompare;
     // add user to the current group tree and fill the movies viewed as group prior to join
-    return NodeGroupToUpdate->get_key_to_set().add_user(UserToAdd, ptrCompare);
+    StatusType status =NodeGroupToUpdate->get_key_to_set().add_user(UserToAdd, ptrCompare);
+    NodeGroupToUpdate = nullptr;
+    return status;
 }
 
 //TODO: galor changes

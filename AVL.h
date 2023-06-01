@@ -721,7 +721,7 @@ StatusType TreeNode<T>::insertBy(const T& value, Condition condition) {
         try {
             root = new Node<T>(value);
             elementsCount++;
-            return StatusType::ALLOCATION_ERROR;
+            return StatusType::SUCCESS;
         }
         catch (...)
         {
