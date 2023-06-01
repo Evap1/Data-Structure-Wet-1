@@ -7,20 +7,33 @@
 #include "wet1util.h"
 #include "User.h"
 #include "AVL.h"
+//TODO: make sure < > = operator for  user* !!!!
+
 class Group{
 private:
     int groupId;
     bool isVip;
-    int viewsAsGroup[(int)Genre::NONE] = {0};
-    TreeNode<User> members;
+    int sumViewsAsGroup [(int)Genre::NONE + 1] = {0};
+    int numOfMoviesWatched [(int)Genre::NONE + 1] = {0};
+    TreeNode<User*>* members;
 
 public:
     explicit Group(int id);
-    void add_user(const User& member);
+    ~Group();
+
+    StatusType add_user(User *member, UserPtrCompare ptrCompare);
     int get_member_count();
     int get_id() const;
-    void empty_group();
+    int get_views_per_genre(Genre type) const;
+    int get_movies_as_group(Genre type) const;
+    TreeNode<User*> *get_members() {return members; };
+    bool is_vip();
+    void empty_group_aux(  Node<User*>* v);
+    StatusType free_members();
     void set_views_per_movie(Genre type);
+    void set_views_per_movie_user_watch(Genre type);
+    void set_views(Genre genre, int amount);
+
 };
 
 // ___________________________________________Operator Overloading__________________________________________

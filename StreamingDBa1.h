@@ -16,21 +16,36 @@
 #define STREAMINGDBA1_H_
 
 #include "wet1util.h"
+#include "AVL.h"
 #include "Group.h"
 #include "User.h"
 #include "Movie.h"
+//NOTE: destructor throws exceptions if memory is not freed. need to make sure to caught on main program.
 
 class streaming_database {
 private:
-	//
-	// Here you may add anything you want
-	//
+    // Equality
+    enum struct FunctionType {
+        INSERT           = 0,
+        REMOVE           = 1,
+        RATE_MOVIE       = 2,
+        UPDATE_VIEWS	 = 3
+    };
+
+
     // None holds the whole tree sorted by : TBD
-    TreeNode<Movie>* moviesByGenre[(int)(Genre::NONE)+1];
+    TreeNode<Movie>* moviesByRateing[(int)(Genre::NONE)+1];
+	TreeNode<Movie>* moviesByID[(int)(Genre::NONE)+1];
+    //TODO: fill & update bestMovie.
+    Node<Movie>* bestMovie[(int)(Genre::NONE)+1];
     TreeNode<User> users;
     TreeNode<Group> groups;
 
-	
+
+int get_all_movies_inside(const Node<Movie>* moviesRoot, int *const output);
+StatusType do_to_all_4_movies_trees(Node<Movie>* node, int rate , FunctionType function);
+
+
 public:
 	// <DO-NOT-MODIFY> {
 	

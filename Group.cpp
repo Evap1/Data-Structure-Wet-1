@@ -4,51 +4,120 @@
 
 #include "Group.h"
 
-Group::Group(int id) : groupId(id), isVip(false) {}
+Group::Group(int id) : groupId(id), isVip(false) {
+    members = new TreeNode<User*>();
+}
 
-/// @brief add new user to a group
-/// @param member
-void Group::add_user(const User &member) {
-    if (member.is_vip()){
-        isVip = true;
+
+/// @brief Destructor uses TreeNode destructor
+Group::~Group() {
+    if (members != NULL && members->get_counter()>0){
+        Node<User*>* root = members->get_root();
+        empty_group_aux(root);
+        delete members;
     }
-    members.insert(member);
 }
 
 // _________________________________________________GETTERS______________________________________________________________
 
 /// @return how many users this group has.
+//TODO: if do problems, change with simple counter.
 int Group::get_member_count() {
-    return members.get_counter();
+    return members->get_counter();
 }
 
-/// @brief add to a certain genre num of views as the size of the group, after group watch.
 /// @param type
-void Group::set_views_per_movie(Genre type) {
-    viewsAsGroup[(int)type]+= members.get_counter();
+/// @return how many views the current group has, of genre type.
+int Group::get_views_per_genre(Genre type) const {
+    return sumViewsAsGroup[(int)type];
+}
+/// @param type
+/// @return how many movies the current group watched, of genre type.
+int Group::get_movies_as_group(Genre type) const {
+    return numOfMoviesWatched[(int)type];
+}
+
+/// @return how many users this group has.
+bool Group::is_vip() {
+    return isVip;
 }
 
 int Group::get_id() const {
     return groupId;
 }
-////TODO: operator = for treenode
-//void Group::empty_group() {
-//    TreeNode<User> toRemove = members;
-//    int size = members.get_counter();
-//    Node<User>** arr = new Node<User>*[size];
-//    toRemove.list_inorder(arr);
-//    Node<User>* current;
-//    for (int i = 0; i < size; i++){
-//        current = arr[i];
-//        current->
-//    }
-//}
-//
-//Node<User>* Group::empty_group_aux(TreeNode<User>* u){
-//    if (u ==NULL) return NULL;
-//    empty_group_aux()
-//}
+// _________________________________________________SETTERS______________________________________________________________
 
+
+/// @brief add to a certain genre num of views as the size of the group, after group watch.
+/// @param type
+void Group::set_views_per_movie(Genre type) {
+    sumViewsAsGroup[(int)type]+= members->get_counter();
+}
+
+/// @brief keep track of num of views not as group, when already registered in a group.
+/// @param type
+void Group::set_views_per_movie_user_watch(Genre type) {
+    sumViewsAsGroup[(int)type]++;
+}
+
+void Group::set_views(Genre genre, int amount){
+    sumViewsAsGroup[(int)genre] += amount;
+}
+
+
+// _________________________________________________OTHER METHODS______________________________________________________________
+
+/// @brief add new user to a group
+/// @param member
+StatusType Group::add_user(User* member, UserPtrCompare ptrCompare) {
+    if (member->is_vip()){
+        isVip = true;
+    }
+    // add the views per genres each user has watched prior to joining the team.
+    for (int i = 0; i <= (int)Genre::NONE; i++){
+        sumViewsAsGroup[i] += member->get_views_per_genre((Genre)i);
+    }
+    // update how many movies the team watched of type genre.
+    for (int i = 0; i <= (int)Genre::NONE; i++){
+        member->set_views_as_group_join((Genre)i,numOfMoviesWatched[i] );
+    }
+    //TODO: maybe problems with ptr
+    member->set_group_ptr(this);
+    return members->insertBy(member, ptrCompare);
+}
+
+//TODO: make sure the warning is ok
+/// @brief Recursivly, inorder, change the groupId field in users,
+/// @param v - ptr to User* (a.k. node of type User*, so the changes apply in Users tree as well)
+void Group::empty_group_aux( Node<User*>* v) {
+    if (v == NULL) return;
+
+    // recursive call to left
+    empty_group_aux(v->get_left_nonConst());
+
+    // action on the element
+    for (int i = 0; i <= (int)Genre::NONE; i++){
+        int toAdd = v->get_key_to_set()->get_views_when_leave((Genre)i);
+        v->get_key_to_set()->set_views_as_group_join((Genre)i, toAdd);
+    }
+    v->get_key_to_set()->set_group_id(User::NONE);
+    //TODO: maybe problems with null
+    v->get_key_to_set()->set_group_ptr_null(nullptr);
+
+    // recursive call to right
+    empty_group_aux(v->get_right_nonConst());
+}
+
+StatusType Group::free_members() {
+    StatusType status = members->delete_tree();
+    if (status == StatusType::SUCCESS){
+        if (members->get_root()==NULL){
+            return StatusType::SUCCESS;
+        }
+        return StatusType::ALLOCATION_ERROR;
+    }
+    return StatusType::FAILURE;
+}
 
 
 // ___________________________________________Operator Overloading__________________________________________

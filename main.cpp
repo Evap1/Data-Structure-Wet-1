@@ -6,6 +6,8 @@ int main()
 {
     TreeNode<int> t;
     t.insert(20);
+    t.remove(20);
+
     t.insert(25);
     t.insert(15);
     t.insert(10);
@@ -21,12 +23,15 @@ int main()
     t.insert(69);
     t.insert(8);
 
+
+ t.printBT(t);
     t.remove(5);
     t.remove(35);
     t.remove(65);
     t.remove(89);
     t.remove(100);
     t.remove(43);
+    t.printBT(t);
     t.remove(88);
     t.remove(20);
     t.remove(38);

@@ -4,6 +4,9 @@
 
 #include "wet1util.h"
 #include<iostream>
+#include "AVL.h"
+//
+class IdSearch;
 
 
 class Movie{
@@ -18,8 +21,10 @@ class Movie{
     int ratersCont;
 
 public:
+
+    //friend class IdSearch;
+
     Movie(int id, Genre genreType, int viewsCount, bool isVip);
-    Movie(const Movie& movie) = delete;
     ~Movie() =  default;
 
     int getMovieId() const;
@@ -28,13 +33,39 @@ public:
     int getViews() const;
     double getRate() const;
 
-    void add_views(int count);
-    void add_rating(int rate);
+    StatusType add_views(int count);
+    StatusType add_rating(int rated);
 
     void printMovie() const;
 
 
 };
+
+bool operator>(const Movie &movie1, const Movie &movie2);
+bool operator<(const Movie& movie1, const Movie& movie2);
+bool operator==(const Movie &movie1, const Movie &movie2);
+
+
+
+class IdSearch{
+    public:
+    IdSearch() = default;
+    bool operator()(const Movie& movie1, const Movie& movie2, Equality kind) const
+    {
+        if(kind == Equality::LESS)
+            return movie1.getMovieId() < movie2.getMovieId();   
+
+        if(kind == Equality::EQUAL)
+            return movie1.getMovieId() == movie2.getMovieId();
+
+        //if(kind == Equality::GREATER)
+        return movie1.getMovieId() > movie2.getMovieId();
+            
+    }
+};
+
+
+
 
 
 #endif //WET1_MOVIE_H
