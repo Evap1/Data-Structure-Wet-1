@@ -106,7 +106,7 @@ StatusType streaming_database::remove_user(int userId)
             int substruct = userViewsAlone + totalViewsGroup - userViewsWhenJoin;
             toUpdate->set_views((Genre)i, -substruct );
             UserPtrCompare ptrCompare;
-            toUpdate->getMembers()->removeBy(toRemove->get_key(), ptrCompare);
+            toUpdate->get_members()->removeBy(toRemove->get_key_by_ref(), ptrCompare);
         }
     }
 	return users.remove(User(userId));

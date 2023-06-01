@@ -69,8 +69,7 @@ void Group::set_views(Genre genre, int amount){
 
 /// @brief add new user to a group
 /// @param member
-template <class Condition>
-StatusType Group::add_user(User* member, Condition condition) {
+StatusType Group::add_user(User* member, UserPtrCompare ptrCompare) {
     if (member->is_vip()){
         isVip = true;
     }
@@ -84,7 +83,7 @@ StatusType Group::add_user(User* member, Condition condition) {
     }
     //TODO: maybe problems with ptr
     member->set_group_ptr(this);
-    return members->insertBy(member, condition);
+    return members->insertBy(member, ptrCompare);
 }
 
 //TODO: make sure the warning is ok

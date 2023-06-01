@@ -98,7 +98,7 @@ private:
     Node<T>* insertBy(Node<T>* node, const T& value, Condition condition);
 
     template <class Condition>
-    Node<T>* TreeNode<T>::removeBy(Node<T> *v,const T& value, Condition condition);
+    Node<T>* removeBy_inside(Node<T> *currentRoot,const T& value, Condition condition);
 
 
 public:
@@ -128,7 +128,7 @@ public:
     StatusType insertBy(const T& value, Condition condition);
 
     template <class Condition>
-    StatusType TreeNode<T>::removeBy(const T &value, Condition condition);
+    StatusType removeBy(const T &value, Condition condition);
 
     
 };
@@ -648,7 +648,7 @@ template <class T>
 template <class Condition>
 Node<T>* TreeNode<T>::findBy(const T& value, Condition condition)
 {
-    if (value == NULL || elementsCount>0) return NULL;
+    if (elementsCount>0) return NULL;
     return findBy_inside(value, root, condition);
 }
 
@@ -719,7 +719,7 @@ Node<T> *TreeNode<T>::insertBy(Node<T>* node, const T& value, Condition conditio
     }
 
     if (condition(node->key, value, Equality::GREATER)){
-        node->left = insertBy(node->left, value);
+        node->left = insertBy(node->left, value, condition);
     }
 
     node = balance_Tree(node);
@@ -743,7 +743,7 @@ StatusType TreeNode<T>::removeBy(const T &value, Condition condition) {
     // removing one element only if exists
     if (findBy(value, condition) != NULL){
         try {
-            root = removeBy(value,root, condition);
+            root = removeBy_inside(root, value, condition);
         }
         catch(...){
             return StatusType::ALLOCATION_ERROR;
@@ -760,45 +760,45 @@ StatusType TreeNode<T>::removeBy(const T &value, Condition condition) {
 // Delete a node and re-balance the tree - all the way to the root.
 template<class T>
 template <class Condition>
-Node<T>* TreeNode<T>::removeBy(Node<T> *v,const T& value, Condition condition) {
+Node<T>* TreeNode<T>::removeBy_inside(Node<T> *currentRoot,const T& value, Condition condition) {
     Node<T>* temp;
 
     // if value not found, remove returns NULL.
-    if (v == NULL){
+    if (currentRoot == NULL){
         return NULL;
     }
 
     // binary search for the element. ALL CASES ONLY FOR FOUND ELEMENT
     // case1: value to be found is smaller than current value
-    else if (condition( value , v->key,Equality::LESS )){
-        v->left = removeBy(value, v->left,condition);
+    else if (condition( value , currentRoot->key,Equality::LESS )){
+        currentRoot->left = removeBy_inside(currentRoot->left,value,condition);
     }
     // case2: value to be found is greater than current value
-    else if (condition( value , v->key,Equality::GREATER )){
-        v->right = removeBy(value, v->right, condition);
+    else if (condition( value , currentRoot->key,Equality::GREATER )){
+        currentRoot->right = removeBy_inside(currentRoot->right,value, condition);
     }
     // case3.1: element is found with two subtrees, we make copies and "roll" until
     //  we reach the level of a leaf. and make deletion the the last else.
-    else if (v->left != NULL && v->right != NULL){
+    else if (currentRoot->left != NULL && currentRoot->right != NULL){
         //find the new head of the right subtree
-        temp = findMin(v->right);
+        temp = findMin(currentRoot->right);
         //copy the min element in right subtree
-        v->key = temp->key;
+        currentRoot->key = temp->key;
         //delete other(!) element which we have just copied.
-        v->right = removeBy(v->key, v->right,condition);
+        currentRoot->right = removeBy_inside(currentRoot->right, value,condition);
     }
     // case3.2: element is found with one or none subtrees
     else {
-        temp = v;
-        if (v->right == NULL && v->left == NULL){
+        temp = currentRoot;
+        if (currentRoot->right == NULL && currentRoot->left == NULL){
             delete temp;
         }
-        else if (v->left == NULL){
-            v = v->right;
+        else if (currentRoot->left == NULL){
+            currentRoot = currentRoot->right;
             delete temp;
         }
-        else if (v->right == NULL){
-            v = v->left;
+        else if (currentRoot->right == NULL){
+            currentRoot = currentRoot->left;
             delete temp;
         }
         //TODO: is there a way to determine if delete didnt work?
@@ -806,15 +806,15 @@ Node<T>* TreeNode<T>::removeBy(Node<T> *v,const T& value, Condition condition) {
     }
 
     //in case v is the last on any subtree;
-    if ( v == NULL ){
-        return v;
+    if ( currentRoot == NULL ){
+        return currentRoot;
     }
     //update new heights:
-    updateHeight(v);
+    updateHeight(currentRoot);
 
     //rotations if needed, from bottom -> up:
-    v = balance_Tree(v);
-    return v;
+    currentRoot = balance_Tree(currentRoot);
+    return currentRoot;
 }
 
 

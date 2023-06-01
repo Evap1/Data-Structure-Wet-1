@@ -21,13 +21,12 @@ public:
     explicit Group(int id);
     ~Group();
 
-    template<class Condition>
-    StatusType add_user(User *member, Condition condition);
+    StatusType add_user(User *member, UserPtrCompare ptrCompare);
     int get_member_count();
     int get_id() const;
     int get_views_per_genre(Genre type) const;
     int get_movies_as_group(Genre type) const;
-    TreeNode<User*> get_members() {return *members; };
+    TreeNode<User*> *get_members() {return members; };
     bool is_vip();
     void empty_group_aux(  Node<User*>* v);
     StatusType free_members();
