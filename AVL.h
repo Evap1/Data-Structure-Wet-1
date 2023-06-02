@@ -706,15 +706,16 @@ Node<T>* TreeNode<T>::findBy_inside(const T& value, Node<T> *rootCurrent, Condit
 
 /// @brief insert one element with a value.
 /// @tparam T -class type
-/// @param value - to be added.
+/// @param value - to be added. we assume value is not null!
 /// @return Status of the operation.
 template<class T>
 template <class Condition>
 StatusType TreeNode<T>::insertBy(const T& value, Condition condition) {
     // inserting one element only if NOT exists
     //TODO: may cause issues
-    if(value==NULL)
-        return StatusType::FAILURE;
+//    if(value==NULL)
+//        return StatusType::FAILURE;
+
     if(elementsCount >0)
     {
         if (findBy(value, condition) == NULL){

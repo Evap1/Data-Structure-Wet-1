@@ -142,11 +142,12 @@ StatusType streaming_database::remove_user(int userId)
 StatusType streaming_database::add_group(int groupId)
 {
     if (groupId <= 0) return StatusType::INVALID_INPUT;
-    Group* group = new Group(groupId);
+    Group* group = new Group(groupId, true);
     StatusType status = groups.insert(*group);
-    group->set_members(NULL);
+//    group->set_members(NULL);
     delete group;
     return status;
+
 }
 
 /// @brief remove node group from the tree group. unsign all memebers
@@ -160,7 +161,7 @@ StatusType streaming_database::remove_group(int groupId)
     // unassiagn all related users.
 
     // find group in the tree. if not found, it's a failure
-    Node<Group>* toDelete = groups.find(Group(groupId));
+    Node<Group>* toDelete = groups.find(Group(groupId, true));
     if (toDelete == NULL) return StatusType::FAILURE;
 
     ///TODO: check agin the logic and what we want to do here!
@@ -172,7 +173,7 @@ StatusType streaming_database::remove_group(int groupId)
 
 
     //toDelete->get_key_by_ref()->empty_group();
-    return groups.remove(Group(groupId));
+    return groups.remove(Group(groupId, true));
 }
 
 /// @brief add user by id , to a user tree inside a group by id. O(logn+logm)
@@ -185,7 +186,7 @@ StatusType streaming_database::add_user_to_group(int userId, int groupId)
     if (groupId <= 0 || userId <= 0) return StatusType::INVALID_INPUT;
 
     // find group in the tree. if not found, it's a failure
-    Node<Group>* NodeGroupToUpdate = groups.find(Group(groupId));
+    Node<Group>* NodeGroupToUpdate = groups.find(Group(groupId,true));
     if (NodeGroupToUpdate == NULL) return StatusType::FAILURE;
 
     // find ptr to user to add. if not found, it's a failure
@@ -250,7 +251,6 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
         Group* GroupToAdd = UserToAdd->get_group_ptr();
         GroupToAdd->set_views_per_movie_user_watch(MovieToUpdate->getGenre());
     }
-    delete tempMovieNode;
     return StatusType::SUCCESS;
 }
 
@@ -265,7 +265,7 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
     if (movieId <= 0 || groupId <= 0) return StatusType::INVALID_INPUT;
 
     // find ptr to group to add. if not found, it's a failure
-    Group *GroupToAdd = groups.find(Group(groupId))->get_key_by_ref();
+    Group *GroupToAdd = groups.find(Group(groupId,true))->get_key_by_ref();
     if (GroupToAdd == NULL || GroupToAdd->get_member_count() == 0) return StatusType::FAILURE;
 
     // find ptr to user to movie. if not found, it's a failure
@@ -330,7 +330,7 @@ StatusType streaming_database::get_all_movies(Genre genre, int *const output)
 
     if(moviesByRateing[(int)genre]->get_root() != NULL)
     {
-        get_all_movies_inside(moviesByRateing[(int)genre]->get_root(), output);
+        get_all_movies_inside(moviesByRateing[(int)genre]->get_root(), output,0);
         return StatusType::SUCCESS;
     }
     return StatusType::FAILURE;
@@ -342,19 +342,20 @@ StatusType streaming_database::get_all_movies(Genre genre, int *const output)
 /// @param output
 /// @return The return is for the rcursion for the indexing in the array
 
-int streaming_database::get_all_movies_inside(const Node<Movie>* moviesRoot, int *const output)
+int streaming_database::get_all_movies_inside(const Node<Movie>* moviesRoot, int *const output, int startIndex)
 {
 
     /// TODO: create a get left and get right function to the tree
     if (moviesRoot == NULL){
-        return 0;
+        return startIndex;
     }
 
-    int i = get_all_movies_inside(moviesRoot->get_right() , output);
-    output[i] = moviesRoot->get_key().getMovieId();
-    i++;
-    i += get_all_movies_inside(moviesRoot->get_left() , output);
-    return i;
+    startIndex = get_all_movies_inside(moviesRoot->get_right() , output, startIndex);
+    output[startIndex] = moviesRoot->get_key().getMovieId();
+    startIndex++;
+    return get_all_movies_inside(moviesRoot->get_left() , output, startIndex);
+//    return startIndex;
+
 }
 
 /// @brief find the num of views of a user per genre. O(logn)
@@ -447,7 +448,7 @@ output_t<int> streaming_database::get_group_recommendation(int groupId)
         return {output_t<int>(StatusType::INVALID_INPUT)};
     }
     // find ptr to group. if not found, it's a failure
-    Group* GroupToAdd = groups.find(Group(groupId))->get_key_by_ref();
+    Group* GroupToAdd = groups.find(Group(groupId,true))->get_key_by_ref();
 
     if (GroupToAdd == NULL || GroupToAdd->get_member_count() == 0)
         return {output_t<int>(StatusType::FAILURE)};
@@ -519,6 +520,8 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
 
     if(node == NULL)
         return StatusType::INVALID_INPUT;
+    if(node->get_key_by_ref() == NULL)
+        return StatusType::INVALID_INPUT;
 
     Genre genreToUpdate = node->get_key().getGenre();
     IdSearch idSearch;
@@ -528,8 +531,8 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
             case FunctionType::INSERT: {   //TODO: insert or insertBy
                 status1 = moviesByRateing[(int) genreToUpdate]->insert(node->get_key());
                 status2 = moviesByRateing[(int) Genre::NONE]->insert(node->get_key());
-                status3 = moviesByID[(int) genreToUpdate]->insert(node->get_key());
-                status4 = moviesByID[(int) Genre::NONE]->insert(node->get_key());
+                status3 = moviesByID[(int) genreToUpdate]->insertBy(node->get_key(), idSearch);
+                status4 = moviesByID[(int) Genre::NONE]->insertBy(node->get_key(), idSearch);
                 break;
             }
             case FunctionType::REMOVE: {
@@ -537,8 +540,8 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
                 // so it will be deleted when this node is deleted at theis tree
                 status1 = moviesByRateing[(int) genreToUpdate]->remove(node->get_key());
                 status2 = moviesByRateing[(int) Genre::NONE]->remove(node->get_key());
-                status3 = moviesByID[(int) genreToUpdate]->remove(node->get_key());
-                status4 = moviesByID[(int) Genre::NONE]->remove(node->get_key());
+                status3 = moviesByID[(int) genreToUpdate]->removeBy(node->get_key(), idSearch);
+                status4 = moviesByID[(int) Genre::NONE]->removeBy(node->get_key(),idSearch);
 
                 break;
             }
@@ -561,7 +564,7 @@ StatusType streaming_database::do_to_all_4_movies_trees(Node<Movie>* node, int c
                 break;
             }
             case FunctionType::UPDATE_VIEWS: {
-                if (count > 0)
+                if (count <= 0)
                     return StatusType::INVALID_INPUT;
 
 //                Node<Movie>* nodeToFunc = new Node(*moviesByID[(int)Genre::NONE]->findBy(node->get_key(), idSearch));

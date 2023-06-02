@@ -38,7 +38,6 @@ public:
 
     void printMovie() const;
 
-
 };
 
 bool operator>(const Movie &movie1, const Movie &movie2);

@@ -110,7 +110,7 @@ bool operator>(const Movie &movie1, const Movie &movie2)
             return true;
         else if (movie1.getViews() == movie2.getViews())
         {
-            if (movie1.getMovieId() > movie2.getMovieId())
+            if (movie1.getMovieId() < movie2.getMovieId())
                 return true;
         }
     }

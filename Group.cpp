@@ -10,6 +10,22 @@ Group::Group(int id) :  groupId(id), isVip(false) ,numOfVIP(0) , isTemp(true){
 
 }
 
+Group::Group(int id, bool Temp) :  groupId(id), isVip(false) ,numOfVIP(0) , isTemp(Temp){
+    if(Temp)
+        members = NULL;
+//    numOfVIP =0;
+
+}
+
+/// copy constructor. DO NOT COPY THE MEMBERS TREE!!!
+/// \param group
+Group::Group(const Group& group) :  groupId(group.groupId), isVip(group.isVip)
+        ,numOfVIP(group.numOfVIP) , isTemp(group.isTemp) {
+    if(group.members == NULL)
+        members = new TreeNode<User*>();
+//    numOfVIP =0;
+
+}
 
 /// @brief Destructor uses TreeNode destructor
 Group::~Group() {

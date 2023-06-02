@@ -22,7 +22,8 @@ private:
 
 public:
     explicit Group(int id);
-    explicit Group(int id, bool isTemp);
+    Group(int id, bool Temp);
+    Group(const Group& group);
     ~Group();
 
     StatusType add_user(User *member, UserPtrCompare ptrCompare);
