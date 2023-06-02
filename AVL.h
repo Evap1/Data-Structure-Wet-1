@@ -130,7 +130,7 @@ public:
     template <class Condition>
     StatusType removeBy(const T &value, Condition condition);
 
-    
+
 };
 // -----------------------------------------PRIVATE METHODS----------------------------------------
 
@@ -151,7 +151,7 @@ template <class T>
 TreeNode<T>::TreeNode() :
         root(NULL),
         elementsCount(0)
-        {}
+{}
 
 
 // -----------------------------------------Destructor----------------------------------------
@@ -201,8 +201,8 @@ void TreeNode<T>::updateHeight(Node<T>* v) {
         if(v->left->height > v->right->height)
             maxHight = v->left->height;
         v->height = 1 + maxHight;
-    } 
-        
+    }
+
 }
 
 /// @brief Get the balance factor of a node
@@ -288,19 +288,19 @@ template <class T>
 Node<T>* TreeNode<T>::balance_Tree(Node<T>* node)
 {
     if (get_balance_factor(node) == -2){
-            if (get_balance_factor(node->right) == 1){
-                node = rotate_RL(node);
-            }
-            else node = rotate_RR(node);
+        if (get_balance_factor(node->right) == 1){
+            node = rotate_RL(node);
         }
+        else node = rotate_RR(node);
+    }
 
-        if (get_balance_factor(node) == 2){
-            if (get_balance_factor(node->left) == -1){
-                node = rotate_LR(node);
-            }
-            else node = rotate_LL(node);
+    if (get_balance_factor(node) == 2){
+        if (get_balance_factor(node->left) == -1){
+            node = rotate_LR(node);
         }
-     return node;
+        else node = rotate_LL(node);
+    }
+    return node;
 }
 
 /// @brief Find max value IN THE WHOLE TREE and return it's node.
@@ -354,17 +354,17 @@ Node<T>* TreeNode<T>::remove(const T& value, Node<T> *v) {
         return NULL;
     }
 
-    // binary search for the element. ALL CASES ONLY FOR FOUND ELEMENT
-    // case1: value to be found is smaller than current value
+        // binary search for the element. ALL CASES ONLY FOR FOUND ELEMENT
+        // case1: value to be found is smaller than current value
     else if ( value < v->key){
         v->left = remove(value, v->left);
     }
-    // case2: value to be found is greater than current value
+        // case2: value to be found is greater than current value
     else if ( value > v->key){
         v->right = remove(value, v->right);
     }
-    // case3.1: element is found with two subtrees, we make copies and "roll" until
-    //  we reach the level of a leaf. and make deletion the the last else.
+        // case3.1: element is found with two subtrees, we make copies and "roll" until
+        //  we reach the level of a leaf. and make deletion the the last else.
     else if (v->left != NULL && v->right != NULL){
         //find the new head of the right subtree
         temp = findMin(v->right);
@@ -373,10 +373,11 @@ Node<T>* TreeNode<T>::remove(const T& value, Node<T> *v) {
         //delete other(!) element which we have just copied.
         v->right = remove(v->key, v->right);
     }
-    // case3.2: element is found with one or none subtrees
+        // case3.2: element is found with one or none subtrees
     else {
         temp = v;
         if (v->right == NULL && v->left == NULL){
+            v = NULL;
             delete temp;
             return NULL;
         }
@@ -652,7 +653,7 @@ void TreeNode<T>::print_tree() {
 template<class T>
 void TreeNode<T>::printBT(const TreeNode& tree)
 {
-    printBT("", tree.root, false);    
+    printBT("", tree.root, false);
 }
 
 // Print function to show the current tree. left, root, right.
@@ -752,7 +753,7 @@ StatusType TreeNode<T>::insertBy(const T& value, Condition condition) {
 template<class T>
 template <class Condition>
 Node<T> *TreeNode<T>::insertBy(Node<T>* node, const T& value, Condition condition) {
-    
+
     if (node == NULL){
         node = new Node<T>(value);
         elementsCount++;
@@ -817,17 +818,17 @@ Node<T>* TreeNode<T>::removeBy_inside(Node<T> *currentRoot,const T& value, Condi
         return NULL;
     }
 
-    // binary search for the element. ALL CASES ONLY FOR FOUND ELEMENT
-    // case1: value to be found is smaller than current value
+        // binary search for the element. ALL CASES ONLY FOR FOUND ELEMENT
+        // case1: value to be found is smaller than current value
     else if (condition( value , currentRoot->key,Equality::LESS )){
         currentRoot->left = removeBy_inside(currentRoot->left,value,condition);
     }
-    // case2: value to be found is greater than current value
+        // case2: value to be found is greater than current value
     else if (condition( value , currentRoot->key,Equality::GREATER )){
         currentRoot->right = removeBy_inside(currentRoot->right,value, condition);
     }
-    // case3.1: element is found with two subtrees, we make copies and "roll" until
-    //  we reach the level of a leaf. and make deletion the the last else.
+        // case3.1: element is found with two subtrees, we make copies and "roll" until
+        //  we reach the level of a leaf. and make deletion the the last else.
     else if (currentRoot->left != NULL && currentRoot->right != NULL){
         //find the new head of the right subtree
         temp = findMin(currentRoot->right);
@@ -836,7 +837,7 @@ Node<T>* TreeNode<T>::removeBy_inside(Node<T> *currentRoot,const T& value, Condi
         //delete other(!) element which we have just copied.
         currentRoot->right = removeBy_inside(currentRoot->right, value,condition);
     }
-    // case3.2: element is found with one or none subtrees
+        // case3.2: element is found with one or none subtrees
     else {
         temp = currentRoot;
         if (currentRoot->right == NULL && currentRoot->left == NULL){

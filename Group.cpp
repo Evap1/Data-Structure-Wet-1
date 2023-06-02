@@ -4,17 +4,21 @@
 
 #include "Group.h"
 
-Group::Group(int id) : groupId(id), isVip(false) {
+Group::Group(int id) :  groupId(id), isVip(false) ,numOfVIP(0) , isTemp(true){
     members = new TreeNode<User*>();
-    numOfVIP =0;
+//    numOfVIP =0;
+
 }
 
 
 /// @brief Destructor uses TreeNode destructor
 Group::~Group() {
-    if (members->get_root() != NULL && members->get_counter()>0){
-        Node<User*>* root = members->get_root();
-        empty_group_aux(root);
+    if(!isTemp)
+    {
+        if (members->get_root() != NULL && members->get_counter()>0){
+            Node<User*>* root = members->get_root();
+            empty_group_aux(root);
+        }
     }
     delete members;
 }
@@ -46,6 +50,7 @@ bool Group::is_vip() {
 int Group::get_id() const {
     return groupId;
 }
+
 // _________________________________________________SETTERS______________________________________________________________
 
 
@@ -65,12 +70,29 @@ void Group::set_views(Genre genre, int amount){
     sumViewsAsGroup[(int)genre] += amount;
 }
 
+/// in use only at add group!! and only in use when the group is temporaty
+/// \param ptr
+void Group::set_members(TreeNode<User*>* ptr){
+    if(ptr == NULL)
+    {
+        if(isTemp)
+        {
+            members = ptr;
+        }
+    }
+}
 
 // _________________________________________________OTHER METHODS______________________________________________________________
 
 /// @brief add new user to a group
 /// @param member
 StatusType Group::add_user(User* member, UserPtrCompare ptrCompare) {
+    if(member == NULL)
+        return StatusType::FAILURE;
+
+    if(isTemp)
+        isTemp = false;
+
     if (member->is_vip()){
         isVip = true;
         numOfVIP++;
