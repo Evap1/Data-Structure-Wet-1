@@ -143,11 +143,16 @@ StatusType streaming_database::remove_user(int userId)
 StatusType streaming_database::add_group(int groupId)
 {
     if (groupId <= 0) return StatusType::INVALID_INPUT;
-    Group* group = new Group(groupId);
-    StatusType status = groups.insert(*group);
-    group->get_members()->set_root(NULL);
-    delete group;
-    return status;
+    try{
+        Group* group = new Group(groupId);
+        StatusType status = groups.insert(*group);
+        group->get_members()->set_root(NULL);
+        delete group;
+        return status;
+    }
+    catch (std::bad_alloc &e){
+        return StatusType::ALLOCATION_ERROR;
+    }
 
 }
 
@@ -174,6 +179,9 @@ StatusType streaming_database::remove_group(int groupId)
 
 
     //toDelete->get_key_by_ref()->empty_group();
+//    StatusType status1 = toDelete->get_key_by_ref()->empty_group_aux(toDelete->get_members());
+//    StatusType status2 = groups.remove(toDelete->get_key());
+//    return correct_status(status1, status2);
     return groups.remove(toDelete->get_key());
 }
 
@@ -216,7 +224,10 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
     if (movieId <= 0 || userId <= 0) return StatusType::INVALID_INPUT;
 
     // find ptr to user to add. if not found, it's a failure
-    User *UserToAdd = users.find(User(userId))->get_key_by_ref();
+
+    Node<User>* NodeUser = users.find(User(userId));
+    if(NodeUser== NULL) return StatusType::FAILURE;
+    User* UserToAdd = NodeUser->get_key_by_ref();
     if (UserToAdd == NULL) return StatusType::FAILURE;
 
     // find ptr to user to movie. if not found, it's a failure
@@ -266,7 +277,10 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
     if (movieId <= 0 || groupId <= 0) return StatusType::INVALID_INPUT;
 
     // find ptr to group to add. if not found, it's a failure
-    Group *GroupToAdd = groups.find(Group(groupId))->get_key_by_ref();
+
+    Node<Group>* NodeGroupToUpdate = groups.find(Group(groupId));
+    if (NodeGroupToUpdate == NULL) return StatusType::FAILURE;
+    Group* GroupToAdd = NodeGroupToUpdate->get_key_by_ref();
     if (GroupToAdd == NULL || GroupToAdd->get_member_count() == 0) return StatusType::FAILURE;
 
     // find ptr to user to movie. if not found, it's a failure
@@ -292,6 +306,8 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
 
     // update views for group
     GroupToAdd->set_views_per_movie(MovieToUpdate->getGenre());
+    GroupToAdd->set_num_movies_as_group(MovieToUpdate->getGenre());
+
 
     // TODO: calculate the status
     return StatusType::SUCCESS;
@@ -464,7 +480,7 @@ output_t<int> streaming_database::get_group_recommendation(int groupId)
             favourite = (Genre)i;
         }
         // if equal views, the first in the list is the winner.
-        if (current == max ){
+        else if (current == max ){
             if ((int)favourite > i){
                 favourite = (Genre)i;
             }

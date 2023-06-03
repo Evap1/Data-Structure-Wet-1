@@ -167,12 +167,21 @@ StatusType Group::free_members() {
         return StatusType::SUCCESS;
     StatusType status = members->delete_tree();
     if (status == StatusType::SUCCESS){
-        if (members->get_root() == NULL){
-            return StatusType::SUCCESS;
-        }
-        return StatusType::ALLOCATION_ERROR;
+        members->set_root(NULL);
+        return StatusType::SUCCESS;
+
+//        if (members->get_root() == NULL){
+//            return StatusType::SUCCESS;
+//        }
+//        return StatusType::ALLOCATION_ERROR;
     }
     return StatusType::FAILURE;
+}
+
+
+/// @brief how many movies the current group watched, of genre type.
+void Group::set_num_movies_as_group(Genre type)  {
+    numOfMoviesWatched[(int)type]++;
 }
 
 void Group::get_members_out_of_group(Node<User*>* currentRoot)
@@ -223,11 +232,15 @@ Group& Group::operator=(Group &other)
     }
 
     //prevent deleting one ond effect the other (we cant copy all because it will harm the complexity)
-    members->set_root(other.members->get_root());
+//    members->set_root(other.members->get_root());
+    empty_group_aux(members->get_root());
+    *members = *other.members; // we assume it moves the root by referance
     other.members->set_root(NULL);
 
     return *this;
 }
+
+
 
 
 

@@ -44,6 +44,7 @@ public:
     void set_members(TreeNode<User*>* ptr);
     void get_members_out_of_group(Node<User*>* currentRoot);
 
+    void set_num_movies_as_group(Genre type);
 
 };
 

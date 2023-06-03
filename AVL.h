@@ -519,6 +519,7 @@ StatusType TreeNode<T>::delete_tree(){
     catch (...){
         throw runtime_error("AVLTree, delete_tree(root) has a problem.");
     }
+    elementsCount = 0;
     return StatusType::SUCCESS;
 }
 
