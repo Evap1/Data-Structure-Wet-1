@@ -180,6 +180,7 @@ StatusType streaming_database::remove_group(int groupId)
     // find group in the tree. if not found, it's a failure
     Group* tempG = new Group(groupId);
     Node<Group>* NodeGroupToUpdate = groups.find(*tempG);
+    tempG->get_members()->set_root(NULL);
     delete tempG;
     if (NodeGroupToUpdate == NULL) return StatusType::FAILURE;
     Group* groupToDelete = NodeGroupToUpdate->get_key_by_ref();
@@ -206,6 +207,7 @@ StatusType streaming_database::add_user_to_group(int userId, int groupId)
     // find group in the tree. if not found, it's a failure
     Group* tempG = new Group(groupId);
     Node<Group>* NodeGroupToUpdate = groups.find(*tempG);
+    tempG->get_members()->set_root(NULL);
     delete tempG;
     if (NodeGroupToUpdate == NULL) return StatusType::FAILURE;
     Group* groupToUpdate = NodeGroupToUpdate->get_key_by_ref();
@@ -297,6 +299,7 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
     // find group in the tree. if not found, it's a failure
     Group* tempG = new Group(groupId);
     Node<Group>* NodeGroupToUpdate = groups.find(*tempG);
+    tempG->get_members()->set_root(NULL);
     delete tempG;
     if (NodeGroupToUpdate == NULL) return StatusType::FAILURE;
     Group* GroupToAdd = NodeGroupToUpdate->get_key_by_ref();
@@ -496,6 +499,7 @@ output_t<int> streaming_database::get_group_recommendation(int groupId)
     // find group in the tree. if not found, it's a failure
     Group* tempG = new Group(groupId);
     Node<Group>* NodeGroupToUpdate = groups.find(*tempG);
+    tempG->get_members()->set_root(NULL);
     delete tempG;
     if (NodeGroupToUpdate == NULL) return {output_t<int>(StatusType::FAILURE)};
     Group* GroupToAdd = NodeGroupToUpdate->get_key_by_ref();
