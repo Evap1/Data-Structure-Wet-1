@@ -330,7 +330,7 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
 
     // update views for group
     GroupToAdd->set_views_per_movie(MovieToUpdate->getGenre());
-
+    GroupToAdd->set_num_movies_as_group(MovieToUpdate->getGenre());
     // TODO: calculate the status
     return StatusType::SUCCESS;
 }
@@ -517,7 +517,7 @@ output_t<int> streaming_database::get_group_recommendation(int groupId)
             favourite = (Genre)i;
         }
         // if equal views, the first in the list is the winner.
-        if (current == max ){
+        else if (current == max ){
             if ((int)favourite > i){
                 favourite = (Genre)i;
             }

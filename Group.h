@@ -42,6 +42,7 @@ public:
     void set_views(Genre genre, int amount);
     void remove_vip();
     void set_members(TreeNode<User*>* ptr);
+    void set_num_movies_as_group(Genre type);
     void get_members_out_of_group(Node<User*>* currentRoot);
 
 

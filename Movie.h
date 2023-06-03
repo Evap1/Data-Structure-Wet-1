@@ -11,8 +11,8 @@ class IdSearch;
 
 class Movie{
 
-    private:
-    
+private:
+
     int movieId;
     Genre genre;
     bool vipOnly;
@@ -47,19 +47,19 @@ bool operator==(const Movie &movie1, const Movie &movie2);
 
 
 class IdSearch{
-    public:
+public:
     IdSearch() = default;
     bool operator()(const Movie& movie1, const Movie& movie2, Equality kind) const
     {
         if(kind == Equality::LESS)
-            return movie1.getMovieId() < movie2.getMovieId();   
+            return movie1.getMovieId() < movie2.getMovieId();
 
         if(kind == Equality::EQUAL)
             return movie1.getMovieId() == movie2.getMovieId();
 
         //if(kind == Equality::GREATER)
         return movie1.getMovieId() > movie2.getMovieId();
-            
+
     }
 };
 
