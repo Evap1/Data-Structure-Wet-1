@@ -115,7 +115,7 @@ StatusType streaming_database::remove_user(int userId)
     Node<User>* toRemove = users.find(User(userId));
     if(toRemove== NULL)
         return StatusType::FAILURE;
-
+    StatusType status1 = StatusType::SUCCESS, status2;
     //TODO: if user is part of group, can't delete
     Group* toUpdate = toRemove->get_key_by_ref()->get_group_ptr();
     if ( toRemove->get_key_by_ref()->get_group_id() != User::NONE){
@@ -131,9 +131,10 @@ StatusType streaming_database::remove_user(int userId)
             toUpdate->remove_vip();
 
         UserPtrCompare ptrCompare;
-        toUpdate->get_members()->removeBy(toRemove->get_key_by_ref(), ptrCompare);
+        status1 = toUpdate->get_members()->removeBy(toRemove->get_key_by_ref(), ptrCompare);
     }
-    return users.remove(User(userId));
+    status2= users.remove(User(userId));
+    return correct_status(status1, status2);
 }
 
 /// @brief add an empty new group to groups tree. O(logm)
@@ -173,7 +174,7 @@ StatusType streaming_database::remove_group(int groupId)
 
 
     //toDelete->get_key_by_ref()->empty_group();
-    return groups.remove(Group(groupId));
+    return groups.remove(toDelete->get_key());
 }
 
 /// @brief add user by id , to a user tree inside a group by id. O(logn+logm)

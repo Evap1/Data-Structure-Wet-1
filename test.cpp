@@ -54,7 +54,6 @@ void my_query_get_all_movies_aux(streaming_database *obj, Genre genre)
 void test() {
     streaming_database *obj = new streaming_database();
 
-
     get_num_views_aux(obj, 1044, 3);
     obj->group_watch(8523, 8077);
     obj->add_group(7599);
@@ -205,6 +204,7 @@ void test() {
     add_movie_aux(obj, 4518, 2, 38, false);
     obj->get_group_recommendation(425);
     obj->add_group(8772);
+
 
 
 //    get_all_movies_count_aux(obj, 2);

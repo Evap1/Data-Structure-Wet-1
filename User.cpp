@@ -72,6 +72,19 @@ int User::get_views_when_leave(Genre type) const {
     return groupWatchWhenJoin[(int)type];
 }
 
+
+void User::leave_group(int groupWatchComedy, int groupWatchDrama,int groupWatchAction,
+                       int groupWatchFantasy, int groupWatchNone) {
+    groupId = NONE;
+    group = nullptr;
+    viewsPerGenre[(int)Genre::COMEDY] += groupWatchComedy - groupWatchWhenJoin[(int)Genre::COMEDY];
+    viewsPerGenre[(int)Genre::DRAMA] += groupWatchDrama - groupWatchWhenJoin[(int)Genre::DRAMA];
+    viewsPerGenre[(int)Genre::ACTION] += groupWatchAction - groupWatchWhenJoin[(int)Genre::ACTION];
+    viewsPerGenre[(int)Genre::FANTASY] += groupWatchFantasy - groupWatchWhenJoin[(int)Genre::FANTASY];
+    viewsPerGenre[(int)Genre::NONE] += groupWatchNone - groupWatchWhenJoin[(int)Genre::NONE];
+}
+
+
 // ___________________________________________Operator Overloading__________________________________________
 
 bool operator>(const User &user1, const User &user2)

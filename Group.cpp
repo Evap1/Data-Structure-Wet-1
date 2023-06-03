@@ -37,6 +37,7 @@ Group::~Group() {
     {
         if (members->get_root() != NULL && members->get_counter()>0){
             Node<User*>* root = members->get_root();
+           // get_members_out_of_group(root);
             empty_group_aux(root);
         }
     }
@@ -152,16 +153,6 @@ void Group::empty_group_aux( Node<User*>* v) {
     empty_group_aux(v->get_right_nonConst());
 }
 
-StatusType Group::free_members() {
-    StatusType status = members->delete_tree();
-    if (status == StatusType::SUCCESS){
-        if (members->get_root()==NULL){
-            return StatusType::SUCCESS;
-        }
-        return StatusType::ALLOCATION_ERROR;
-    }
-    return StatusType::FAILURE;
-}
 
 void Group::remove_vip()
 {
@@ -171,6 +162,32 @@ void Group::remove_vip()
 }
 
 
+StatusType Group::free_members() {
+    if (members->get_root() == NULL || members->get_counter() == 0)
+        return StatusType::SUCCESS;
+    StatusType status = members->delete_tree();
+    if (status == StatusType::SUCCESS){
+        if (members->get_root() == NULL){
+            return StatusType::SUCCESS;
+        }
+        return StatusType::ALLOCATION_ERROR;
+    }
+    return StatusType::FAILURE;
+}
+
+void Group::get_members_out_of_group(Node<User*>* currentRoot)
+{
+    if(currentRoot == NULL)
+        return;
+
+    get_members_out_of_group(currentRoot->get_left_nonConst());
+    get_members_out_of_group(currentRoot->get_right_nonConst());
+    currentRoot->get_key_to_set()->leave_group(sumViewsAsGroup[(int)Genre::COMEDY],
+                                               sumViewsAsGroup[(int)Genre::DRAMA],
+                                               sumViewsAsGroup[(int)Genre::ACTION],
+                                               sumViewsAsGroup[(int)Genre::FANTASY],
+                                               sumViewsAsGroup[(int)Genre::NONE]);
+}
 
 // ___________________________________________Operator Overloading__________________________________________
 
@@ -188,5 +205,30 @@ bool operator==(const Group& group1, const Group& group2)
 {
     return (group1.get_id() == group2.get_id());
 }
+
+Group& Group::operator=(Group &other)
+{
+    if(this == &other)
+        return *this;
+
+    groupId = other.groupId;
+    isVip = other.isVip;
+    numOfVIP = other.numOfVIP;
+    isTemp = other.isTemp;
+
+    for(int i = 0; i<(int)Genre::NONE + 1; i++)
+    {
+        sumViewsAsGroup[i] = other.sumViewsAsGroup[i];
+        numOfMoviesWatched[i] = other.numOfMoviesWatched[i];
+    }
+
+    //prevent deleting one ond effect the other (we cant copy all because it will harm the complexity)
+    members->set_root(other.members->get_root());
+    other.members->set_root(NULL);
+
+    return *this;
+}
+
+
 
 

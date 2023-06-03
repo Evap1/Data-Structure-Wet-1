@@ -19,6 +19,8 @@ private:
     Group* group;
 
 public:
+    static const int NONE = -1;
+
     explicit User(int userId,bool isVip);
     explicit User(int userId);
     ~User() = default;
@@ -37,7 +39,9 @@ public:
     void leave_group();
     bool is_vip() const;
     void add_views_in_genre(Genre type);
-    static const int NONE = -1;
+
+    void leave_group(int groupWatchComedy, int groupWatchDrama,int groupWatchAction,
+                           int groupWatchFantasy, int groupWatchNone);
 
 };
 

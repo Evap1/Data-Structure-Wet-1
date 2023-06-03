@@ -26,6 +26,8 @@ public:
     Group(const Group& group);
     ~Group();
 
+    Group& operator=(Group &other);
+
     StatusType add_user(User *member, UserPtrCompare ptrCompare);
     int get_member_count();
     int get_id() const;
@@ -40,8 +42,10 @@ public:
     void set_views(Genre genre, int amount);
     void remove_vip();
     void set_members(TreeNode<User*>* ptr);
+    void get_members_out_of_group(Node<User*>* currentRoot);
 
-    };
+
+};
 
 // ___________________________________________Operator Overloading__________________________________________
 
