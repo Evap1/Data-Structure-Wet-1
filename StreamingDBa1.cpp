@@ -142,9 +142,9 @@ StatusType streaming_database::remove_user(int userId)
 StatusType streaming_database::add_group(int groupId)
 {
     if (groupId <= 0) return StatusType::INVALID_INPUT;
-    Group* group = new Group(groupId, true);
+    Group* group = new Group(groupId);
     StatusType status = groups.insert(*group);
-//    group->set_members(NULL);
+    group->get_members()->set_root(NULL);
     delete group;
     return status;
 
@@ -161,7 +161,7 @@ StatusType streaming_database::remove_group(int groupId)
     // unassiagn all related users.
 
     // find group in the tree. if not found, it's a failure
-    Node<Group>* toDelete = groups.find(Group(groupId, true));
+    Node<Group>* toDelete = groups.find(Group(groupId));
     if (toDelete == NULL) return StatusType::FAILURE;
 
     ///TODO: check agin the logic and what we want to do here!
@@ -173,7 +173,7 @@ StatusType streaming_database::remove_group(int groupId)
 
 
     //toDelete->get_key_by_ref()->empty_group();
-    return groups.remove(Group(groupId, true));
+    return groups.remove(Group(groupId));
 }
 
 /// @brief add user by id , to a user tree inside a group by id. O(logn+logm)
@@ -186,7 +186,7 @@ StatusType streaming_database::add_user_to_group(int userId, int groupId)
     if (groupId <= 0 || userId <= 0) return StatusType::INVALID_INPUT;
 
     // find group in the tree. if not found, it's a failure
-    Node<Group>* NodeGroupToUpdate = groups.find(Group(groupId,true));
+    Node<Group>* NodeGroupToUpdate = groups.find(Group(groupId));
     if (NodeGroupToUpdate == NULL) return StatusType::FAILURE;
 
     // find ptr to user to add. if not found, it's a failure
@@ -265,7 +265,7 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
     if (movieId <= 0 || groupId <= 0) return StatusType::INVALID_INPUT;
 
     // find ptr to group to add. if not found, it's a failure
-    Group *GroupToAdd = groups.find(Group(groupId,true))->get_key_by_ref();
+    Group *GroupToAdd = groups.find(Group(groupId))->get_key_by_ref();
     if (GroupToAdd == NULL || GroupToAdd->get_member_count() == 0) return StatusType::FAILURE;
 
     // find ptr to user to movie. if not found, it's a failure
@@ -448,7 +448,7 @@ output_t<int> streaming_database::get_group_recommendation(int groupId)
         return {output_t<int>(StatusType::INVALID_INPUT)};
     }
     // find ptr to group. if not found, it's a failure
-    Group* GroupToAdd = groups.find(Group(groupId,true))->get_key_by_ref();
+    Group* GroupToAdd = groups.find(Group(groupId))->get_key_by_ref();
 
     if (GroupToAdd == NULL || GroupToAdd->get_member_count() == 0)
         return {output_t<int>(StatusType::FAILURE)};

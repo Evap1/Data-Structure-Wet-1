@@ -130,6 +130,8 @@ public:
     template <class Condition>
     StatusType removeBy(const T &value, Condition condition);
 
+    void set_root(Node<T>* newRoot);
+
 
 };
 // -----------------------------------------PRIVATE METHODS----------------------------------------
@@ -623,6 +625,21 @@ template<class T>
 Node<T> *TreeNode<T>::get_root() {
     return root;
 }
+
+template<class T>
+void TreeNode<T>::set_root(Node<T>* newRoot)
+{
+    root = newRoot;
+}
+//
+//template<class T>
+//void TreeNode<T>::set_elementCount(int count)
+//{
+//    root = newRoot;
+//}
+
+
+
 
 // -----------------------------------------PRINT METHODS-----------------------------------------
 // TODO: dont forget to delete
