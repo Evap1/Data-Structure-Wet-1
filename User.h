@@ -36,12 +36,11 @@ public:
     int get_views_per_genre(Genre type) const;
     int get_views_when_leave(Genre type) const;
 
-    void leave_group();
     bool is_vip() const;
     void add_views_in_genre(Genre type);
 
     void leave_group(int groupWatchComedy, int groupWatchDrama,int groupWatchAction,
-                           int groupWatchFantasy, int groupWatchNone);
+                     int groupWatchFantasy, int groupWatchNone);
 
 };
 
@@ -54,12 +53,12 @@ bool operator==(const User& user1, const User& user2);
 
 
 class UserPtrCompare{
-    public:
+public:
     UserPtrCompare() = default;
     bool operator()(const User* userPtr1, const User* userPtr2, Equality kind) const
     {
         if(kind == Equality::LESS)
-            return userPtr1->get_user_id() < userPtr2->get_user_id();   
+            return userPtr1->get_user_id() < userPtr2->get_user_id();
 
         if(kind == Equality::EQUAL)
             return userPtr1->get_user_id() == userPtr2->get_user_id();

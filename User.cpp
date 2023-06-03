@@ -24,9 +24,6 @@ void User::set_group_ptr(Group* other){
 void User::set_group_ptr_null(std::nullptr_t){
     group = nullptr;
 }
-void User::leave_group() {
-    groupId = NONE;
-}
 
 /// @brief Add views to certain genre
 /// @param type

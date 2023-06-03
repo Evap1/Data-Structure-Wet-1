@@ -14,8 +14,8 @@
 /// @param genreType movie's Genre
 /// @param viewsCount movies views till now
 /// @param isVip is the movie for vip's only??
-Movie::Movie(int id, Genre genreType, int viewsCount, bool isVip) : 
-    movieId(id), genre(genreType), vipOnly(isVip)
+Movie::Movie(int id, Genre genreType, int viewsCount, bool isVip) :
+        movieId(id), genre(genreType), vipOnly(isVip)
 {
     views = viewsCount;
     rate = 0;
@@ -24,7 +24,7 @@ Movie::Movie(int id, Genre genreType, int viewsCount, bool isVip) :
 
 
 
- // _______________________________________________Functions______________________________________________
+// _______________________________________________Functions______________________________________________
 
 /// @brief add views to the movie's views count
 /// @param count assume that count is positive
@@ -55,8 +55,8 @@ StatusType Movie::add_rating(int rated)
 /// @brief prints Movie's properties
 void Movie::printMovie() const
 {
-    std::cout << "Movie Id: " << movieId << "\n Genre: " << (int)genre << "\n VipOnly: " << vipOnly 
-        << "\n Rate" << rate << "\n Views: " << views << std::endl;
+    std::cout << "Movie Id: " << movieId << "\n Genre: " << (int)genre << "\n VipOnly: " << vipOnly
+              << "\n Rate" << rate << "\n Views: " << views << std::endl;
 }
 
 
@@ -125,15 +125,14 @@ bool operator<(const Movie& movie1, const Movie& movie2)
 
 
 
- /// @brief check if the movies are equals by their Id
- /// @param movie1
- /// @param movie2
- /// @return
- bool operator==(const Movie &movie1, const Movie &movie2)
- {
-     if(!(movie1>movie2 || movie1<movie2))
-         return true;
-     return false;
- }
-
+/// @brief check if the movies are equals by their Id
+/// @param movie1
+/// @param movie2
+/// @return
+bool operator==(const Movie &movie1, const Movie &movie2)
+{
+    if(!(movie1>movie2 || movie1<movie2))
+        return true;
+    return false;
+}
 
