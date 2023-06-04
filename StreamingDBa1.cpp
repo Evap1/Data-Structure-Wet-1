@@ -7,15 +7,16 @@ StatusType correct_status(StatusType status1,StatusType status2);
 //TODO: may cause problems with new and mempry dealing. users..
 /// @brief Constructor for an empty streaming database.
 // no need to free elements alloced before, not dynamiclly.
-streaming_database::streaming_database()
+streaming_database::streaming_database(): users(), groups()
 {
-    usersPtr = std::unique_ptr<TreeNode<User>>(new TreeNode<User>());
-    groupsPtr = std::unique_ptr<TreeNode<Group>>(new TreeNode<Group>());
-
+//    groupsPtr = std::unique_ptr<TreeNode<Group>>(new TreeNode<Group>());
+//    usersPtr = std::unique_ptr<TreeNode<User>>(new TreeNode<User>());
+//    groups = *groupsPtr;
+//    users = *usersPtr;
+//
     //usersPtr = std::make_unique<TreeNode<User>>(TreeNode<User>());
 //    groupsPtr = std::make_unique<TreeNode<Group>>(TreeNode<Group>());
-    users = *usersPtr;
-    groups = *groupsPtr;
+
 
     for (int i= 0; i <= (int)Genre::NONE; i++){
         moviesByRateing[i] = new TreeNode<Movie>();

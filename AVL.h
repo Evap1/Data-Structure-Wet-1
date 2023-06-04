@@ -373,7 +373,7 @@ Node<T>* TreeNode<T>::remove(const T& value, Node<T> *v) {
         //copy the min element in right subtree
         v->key = temp->key;
         //delete other(!) element which we have just copied.
-        v->right = remove(v->key, v->right);
+        v->right = remove(temp->key, v->right);
     }
         // case3.2: element is found with one or none subtrees
     else {
@@ -854,7 +854,7 @@ Node<T>* TreeNode<T>::removeBy_inside(Node<T> *currentRoot,const T& value, Condi
         //copy the min element in right subtree
         currentRoot->key = temp->key;
         //delete other(!) element which we have just copied.
-        currentRoot->right = removeBy_inside(currentRoot->right, value,condition);
+        currentRoot->right = removeBy_inside(currentRoot->right, temp->get_key(),condition);
     }
         // case3.2: element is found with one or none subtrees
     else {

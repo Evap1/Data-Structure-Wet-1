@@ -136,9 +136,11 @@ StatusType Group::add_user(User* member, UserPtrCompare ptrCompare) {
 /// @param v - ptr to User* (a.k. node of type User*, so the changes apply in Users tree as well)
 void Group::empty_group_aux( Node<User*>* v) {
     if (v == NULL) return;
+    if (v->get_key() == NULL) return;
 
     // recursive call to left
     empty_group_aux(v->get_left_nonConst());
+    empty_group_aux(v->get_right_nonConst());
 
     // action on the element
     for (int i = 0; i <= (int)Genre::NONE; i++){
@@ -150,7 +152,7 @@ void Group::empty_group_aux( Node<User*>* v) {
     v->get_key_to_set()->set_group_ptr_null(nullptr);
 
     // recursive call to right
-    empty_group_aux(v->get_right_nonConst());
+    *(v->get_key_by_ref()) = NULL;
 }
 
 
