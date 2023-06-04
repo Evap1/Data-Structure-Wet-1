@@ -91,10 +91,6 @@ void Group::set_views(Genre genre, int amount){
     sumViewsAsGroup[(int)genre] += amount;
 }
 
-/// @brief how many movies the current group watched, of genre type.
-void Group::set_num_movies_as_group(Genre type)  {
-    numOfMoviesWatched[(int)type]++;
-}
 
 /// in use only at add group!! and only in use when the group is temporaty
 /// \param ptr
@@ -243,7 +239,7 @@ Group& Group::operator=( Group &other)
     empty_group_aux(members->get_root());
     *members = *other.members; // we assume it moves the root by referance
     other.members->set_root(NULL);
-    members->set_member_count(other.get_member_count());
+//    members->set_member_count(other.get_member_count());
 
     return *this;
 }

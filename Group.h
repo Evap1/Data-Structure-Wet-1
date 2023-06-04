@@ -45,7 +45,7 @@ public:
     void set_num_movies_as_group(Genre type);
     void get_members_out_of_group(Node<User*>* currentRoot);
 
-    void set_num_movies_as_group(Genre type);
+//    void set_num_movies_as_group(Genre type);
 
 };
 
