@@ -100,11 +100,15 @@ StatusType streaming_database::remove_movie(int movieId)
 StatusType streaming_database::add_user(int userId, bool isVip)
 {
     if (userId <= 0) return StatusType::INVALID_INPUT;
-    User* user = new User(userId,isVip);
-
-    StatusType status = users.insert(*user);
-    delete user;
-    return status;
+    try{
+        User* user = new User(userId,isVip);
+        StatusType status = users.insert(*user);
+        delete user;
+        return status;
+    }
+    catch(std::bad_alloc &e){
+        return StatusType::ALLOCATION_ERROR;
+    }
 }
 
 /// @brief remove existing user from users tree. O(logn)
@@ -113,28 +117,36 @@ StatusType streaming_database::add_user(int userId, bool isVip)
 StatusType streaming_database::remove_user(int userId)
 {
     if (userId <= 0) return StatusType::INVALID_INPUT;
-    Node<User>* toRemove = users.find(User(userId));
+    //find user
+    User* temp = new User(userId);
+    Node<User>* toRemove = users.find(*temp);
+    delete temp;
     if(toRemove== NULL)
         return StatusType::FAILURE;
+    User* userToRemove = toRemove->get_key_by_ref();
+    if (userToRemove == NULL)
+        return StatusType::FAILURE;
+
     StatusType status1 = StatusType::SUCCESS, status2;
     //TODO: if user is part of group, can't delete
-    Group* toUpdate = toRemove->get_key_by_ref()->get_group_ptr();
-    if ( toRemove->get_key_by_ref()->get_group_id() != User::NONE){
+    Group* toUpdate = userToRemove->get_group_ptr();
+    if ( userToRemove->get_group_id() != User::NONE){
         for (int i= 0; i <= (int)Genre::NONE; i++){
-            int userViewsAlone = toRemove->get_key_by_ref()->get_views_per_genre((Genre)i);
-            int userViewsWhenJoin = toRemove->get_key_by_ref()->get_views_when_leave((Genre)i);
+            int userViewsAlone = userToRemove->get_views_per_genre((Genre)i);
+            int userViewsWhenJoin = userToRemove->get_views_when_leave((Genre)i);
             int totalViewsGroup = toUpdate->get_movies_as_group((Genre)i);
             int substruct = userViewsAlone + totalViewsGroup - userViewsWhenJoin;
             toUpdate->set_views((Genre)i, -substruct );
-
         }
-        if(toRemove->get_key_by_ref()->is_vip())
+        if(userToRemove->is_vip())
             toUpdate->remove_vip();
 
         UserPtrCompare ptrCompare;
-        status1 = toUpdate->get_members()->removeBy(toRemove->get_key_by_ref(), ptrCompare);
+        status1 = toUpdate->get_members()->removeBy(userToRemove, ptrCompare);
     }
-    status2= users.remove(User(userId));
+    User* temp2 = new User(userId);
+    status2 = users.remove(*temp2);
+    delete temp2;
     return correct_status(status1, status2);
 }
 
@@ -168,22 +180,27 @@ StatusType streaming_database::remove_group(int groupId)
     // unassiagn all related users.
 
     // find group in the tree. if not found, it's a failure
-    Node<Group>* toDelete = groups.find(Group(groupId));
-    if (toDelete == NULL) return StatusType::FAILURE;
+    Group* tempG = new Group(groupId);
+    Node<Group>* NodeGroupToUpdate = groups.find(*tempG);
+    tempG->get_members()->set_root(NULL);
+    delete tempG;
+    if (NodeGroupToUpdate == NULL) return StatusType::FAILURE;
+    Group* groupToDelete = NodeGroupToUpdate->get_key_by_ref();
 
     ///TODO: check agin the logic and what we want to do here!
-    /// if we take it' we need to change the Group distructor - to free members only
+    // if we take it' we need to change the Group distructor - to free members only
     //    if (toDelete->get_key_by_ref()->get_members()->get_root() != NULL && toDelete->get_key_by_ref()->get_members()->get_counter()>0) {
     //    Node<User *> *root = toDelete->get_key_by_ref()->get_members()->get_root();
     //    if (root != NULL)
     //       toDelete->get_key_by_ref()->empty_group_aux(root);
-
-
     //toDelete->get_key_by_ref()->empty_group();
 //    StatusType status1 = toDelete->get_key_by_ref()->empty_group_aux(toDelete->get_members());
 //    StatusType status2 = groups.remove(toDelete->get_key());
 //    return correct_status(status1, status2);
-    return groups.remove(toDelete->get_key());
+  //  return groups.remove(toDelete->get_key());
+  
+    return groups.remove(*groupToDelete);
+
 }
 
 /// @brief add user by id , to a user tree inside a group by id. O(logn+logm)
@@ -196,21 +213,28 @@ StatusType streaming_database::add_user_to_group(int userId, int groupId)
     if (groupId <= 0 || userId <= 0) return StatusType::INVALID_INPUT;
 
     // find group in the tree. if not found, it's a failure
-    Node<Group>* NodeGroupToUpdate = groups.find(Group(groupId));
+    Group* tempG = new Group(groupId);
+    Node<Group>* NodeGroupToUpdate = groups.find(*tempG);
+    tempG->get_members()->set_root(NULL);
+    delete tempG;
     if (NodeGroupToUpdate == NULL) return StatusType::FAILURE;
+    Group* groupToUpdate = NodeGroupToUpdate->get_key_by_ref();
 
-    // find ptr to user to add. if not found, it's a failure
-    User* UserToAdd = users.find(User(userId))->get_key_by_ref();
-    if (UserToAdd == NULL) return StatusType::FAILURE;
+    //find user
+    User* temp = new User(userId);
+    Node<User>* NodeUser = users.find(*temp);
+    delete temp;
+    if(NodeUser== NULL) return StatusType::FAILURE;
+    User* userToAdd = NodeUser->get_key_by_ref();
+    if (userToAdd == NULL) return StatusType::FAILURE;
 
     // if user has group, it's a failure. otherwise; update the group id of the user
-    int UserGroup = UserToAdd->get_group_id();
-    if (UserGroup != User::NONE) return StatusType::FAILURE;
-    UserToAdd->set_group_id(groupId);
+    if (userToAdd->get_group_id() != User::NONE) return StatusType::FAILURE;
+    userToAdd->set_group_id(groupId);
 
     UserPtrCompare ptrCompare;
     // add user to the current group tree and fill the movies viewed as group prior to join
-    StatusType status =NodeGroupToUpdate->get_key_to_set().add_user(UserToAdd, ptrCompare);
+    StatusType status = groupToUpdate->add_user(userToAdd, ptrCompare);
     NodeGroupToUpdate = nullptr;
     return status;
 }
@@ -224,9 +248,10 @@ StatusType streaming_database::user_watch(int userId, int movieId) {
     // check input
     if (movieId <= 0 || userId <= 0) return StatusType::INVALID_INPUT;
 
-    // find ptr to user to add. if not found, it's a failure
-
-    Node<User>* NodeUser = users.find(User(userId));
+    //find user
+    User* temp = new User(userId);
+    Node<User>* NodeUser = users.find(*temp);
+    delete temp;
     if(NodeUser== NULL) return StatusType::FAILURE;
     User* UserToAdd = NodeUser->get_key_by_ref();
     if (UserToAdd == NULL) return StatusType::FAILURE;
@@ -285,11 +310,15 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
     // check input
     if (movieId <= 0 || groupId <= 0) return StatusType::INVALID_INPUT;
 
-    // find ptr to group to add. if not found, it's a failure
 
-    Node<Group>* NodeGroupToUpdate = groups.find(Group(groupId));
+    // find group in the tree. if not found, it's a failure
+    Group* tempG = new Group(groupId);
+    Node<Group>* NodeGroupToUpdate = groups.find(*tempG);
+    tempG->get_members()->set_root(NULL);
+    delete tempG;
     if (NodeGroupToUpdate == NULL) return StatusType::FAILURE;
     Group* GroupToAdd = NodeGroupToUpdate->get_key_by_ref();
+
     if (GroupToAdd == NULL || GroupToAdd->get_member_count() == 0) return StatusType::FAILURE;
 
     // find ptr to user to movie. if not found, it's a failure
@@ -316,9 +345,9 @@ StatusType streaming_database::group_watch(int groupId,int movieId)
     StatusType status = do_to_all_4_movies_trees(movieNodeToUpdate, viewsCount, FunctionType::UPDATE_VIEWS);
 
     // update views for group
-    GroupToAdd->set_views_per_movie(genreToUpdate);
-    GroupToAdd->set_num_movies_as_group(genreToUpdate);
 
+    GroupToAdd->set_views_per_movie(MovieToUpdate->getGenre());
+    GroupToAdd->set_num_movies_as_group(MovieToUpdate->getGenre());
 
     // TODO: calculate the status
     return status;
@@ -395,8 +424,13 @@ output_t<int> streaming_database::get_num_views(int userId, Genre genre)
     // check input
     if (userId <= 0) return StatusType::INVALID_INPUT;
 
-    // find ptr to user to add. if not found, it's a failure
-    User *UserToAdd = users.find(User(userId))->get_key_by_ref();
+    //find user
+    User* temp = new User(userId);
+    Node<User>* NodeUser = users.find(*temp);
+    delete temp;
+    if(NodeUser== NULL)
+        return StatusType::FAILURE;
+    User* UserToAdd = NodeUser->get_key_by_ref();
 
     // case 1: user not found:
     if (UserToAdd == NULL) return StatusType::FAILURE;
@@ -422,7 +456,6 @@ output_t<int> streaming_database::get_num_views(int userId, Genre genre)
         }
     }
     return {output_t<int>(counter)};
-
 }
 
 /// @brief rate by user, a movie corresponding to an id. setts the average rate. O(logn + logk)
@@ -436,7 +469,12 @@ StatusType streaming_database::rate_movie(int userId, int movieId, int rating)
         return StatusType::INVALID_INPUT;
 
     Node<User>* userNode = users.find(User(userId, false));
-    if((users.get_root() == NULL) || (userNode == NULL))
+
+    //find user
+    User* temp1 = new User(userId);
+    Node<User>* NodeUser = users.find(*temp1);
+    delete temp1;
+    if(users.get_root() == NULL || NodeUser== NULL)
         return StatusType::FAILURE;
 
     //access the whole tree sorted by rate
@@ -476,7 +514,13 @@ output_t<int> streaming_database::get_group_recommendation(int groupId)
         return {output_t<int>(StatusType::INVALID_INPUT)};
     }
     // find ptr to group. if not found, it's a failure
-    Group* GroupToAdd = groups.find(Group(groupId))->get_key_by_ref();
+    // find group in the tree. if not found, it's a failure
+    Group* tempG = new Group(groupId);
+    Node<Group>* NodeGroupToUpdate = groups.find(*tempG);
+    tempG->get_members()->set_root(NULL);
+    delete tempG;
+    if (NodeGroupToUpdate == NULL) return {output_t<int>(StatusType::FAILURE)};
+    Group* GroupToAdd = NodeGroupToUpdate->get_key_by_ref();
 
     if (GroupToAdd == NULL || GroupToAdd->get_member_count() == 0)
         return {output_t<int>(StatusType::FAILURE)};

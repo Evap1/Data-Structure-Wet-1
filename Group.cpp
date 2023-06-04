@@ -24,7 +24,7 @@ Group::Group(const Group& group) :  groupId(group.groupId), isVip(group.isVip)
 
     ///TODO: needs to copy also the arrays fileds
 //    members = group.members;
-        members = new TreeNode<User*>(*group.members);
+    members = new TreeNode<User*>(*group.members);
 //        members.set_elements_count(group.members->get_counter());
 //        members.set_root(group.members.get_root());
 //    numOfVIP =0;
@@ -37,7 +37,7 @@ Group::~Group() {
     {
         if (members->get_root() != NULL && members->get_counter()>0){
             Node<User*>* root = members->get_root();
-           // get_members_out_of_group(root);
+            // get_members_out_of_group(root);
             empty_group_aux(root);
         }
     }
@@ -89,6 +89,11 @@ void Group::set_views_per_movie_user_watch(Genre type) {
 
 void Group::set_views(Genre genre, int amount){
     sumViewsAsGroup[(int)genre] += amount;
+}
+
+/// @brief how many movies the current group watched, of genre type.
+void Group::set_num_movies_as_group(Genre type)  {
+    numOfMoviesWatched[(int)type]++;
 }
 
 /// in use only at add group!! and only in use when the group is temporaty
@@ -217,7 +222,7 @@ bool operator==(const Group& group1, const Group& group2)
     return (group1.get_id() == group2.get_id());
 }
 
-Group& Group::operator=(Group &other)
+Group& Group::operator=( Group &other)
 {
     if(this == &other)
         return *this;
@@ -238,12 +243,9 @@ Group& Group::operator=(Group &other)
     empty_group_aux(members->get_root());
     *members = *other.members; // we assume it moves the root by referance
     other.members->set_root(NULL);
+    members->set_member_count(other.get_member_count());
 
     return *this;
 }
-
-
-
-
 
 
