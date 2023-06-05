@@ -199,7 +199,7 @@ StatusType streaming_database::remove_group(int groupId)
 //    return correct_status(status1, status2);
   //  return groups.remove(toDelete->get_key());
   
-    return groups.remove(*groupToDelete);
+    return groups.removeFromAVL(*groupToDelete);
 
 }
 

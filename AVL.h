@@ -100,6 +100,9 @@ private:
     template <class Condition>
     Node<T>* removeBy_inside(Node<T> *currentRoot,const T& value, Condition condition);
 
+    Node<T>* takeOutMin(Node<T> *currentRoot,Node<T> *currentRootFather);
+
+
 
 public:
     TreeNode();
@@ -131,9 +134,19 @@ public:
     StatusType removeBy(const T &value, Condition condition);
 
     void set_root(Node<T>* newRoot);
+    Node<T>* removeFromAVL(Node<T>* toRemove, Node<T> * currentRoot,Node<T> *currentFather);
+
+    StatusType removeFromAVL(const T &value);
 
 
-};
+
+
+    };
+
+template<class T>
+Node<T>* findFather(Node<T>* currentRoot,const T& value);
+
+
 // -----------------------------------------PRIVATE METHODS----------------------------------------
 
 /// @brief Node operator= overload
@@ -537,7 +550,8 @@ StatusType TreeNode<T>::remove(const T &value) {
         return StatusType::FAILURE;
     }
     // removing one element only if exists
-    if (find(root, value) != NULL){
+    Node<T>* toRemove = find(root, value);
+    if (toRemove != NULL){
         try {
             root = remove(value,root);
         }
@@ -550,6 +564,304 @@ StatusType TreeNode<T>::remove(const T &value) {
     // value not found:
     return StatusType::FAILURE;
 }
+
+
+/// @brief remove one group
+/// @tparam T -class type
+/// @param value - to be removed
+/// @return Status of the operation.
+template<class T>
+StatusType TreeNode<T>::removeFromAVL(const T &value) {
+    //if (value == NULL) return StatusType::FAILURE;
+    if(elementsCount == 0)
+    {
+        root = NULL;
+        return StatusType::FAILURE;
+    }
+    // removing one element only if exists
+    Node<T>* toRemove = find(root, value);
+    if (toRemove != NULL){
+        try {
+//            root = remove(value,root);
+            Node<T>* fatherOfToRemove = findFather(root ,toRemove);
+            root  = removeFromAVL(toRemove, root,fatherOfToRemove);
+        }
+        catch(...){
+            return StatusType::ALLOCATION_ERROR;
+        }
+        elementsCount--;
+        return StatusType::SUCCESS;
+    }
+    // value not found:
+    return StatusType::FAILURE;
+}
+
+
+
+
+
+
+template<class T>
+Node<T>* TreeNode<T>::removeFromAVL(Node<T>* toRemove, Node<T> * currentRoot,Node<T> *currentFather) {
+    Node<T>* temp;
+
+    // if value not found, remove returns NULL.
+    if (toRemove == NULL){
+        return NULL;
+    }
+    if(currentRoot == NULL)
+        return NULL;
+
+        // binary search for the element. ALL CASES ONLY FOR FOUND ELEMENT
+        // case1: value to be found is smaller than current value
+    if ( toRemove->get_key() < currentRoot->key){
+        currentRoot->left = removeFromAVL(toRemove, currentRoot->left, currentRoot);
+    }
+        // case2: value to be found is greater than current value
+    else if ( toRemove->get_key() > currentRoot->key){
+        currentRoot->right = removeFromAVL(toRemove, currentRoot->right, currentRoot);
+    }
+        // case3.1: element is found with two subtrees, we make copies and "roll" until
+        //  we reach the level of a leaf. and make deletion the the last else.
+    else if (currentRoot->left != NULL && currentRoot->right != NULL){
+        //find the new head of the right subtree
+        Node<T> *minNode, *tempRoot;
+        if(currentFather == NULL)
+        {
+            minNode = findMin(currentRoot->right);
+            tempRoot = takeOutMin(currentRoot->right,currentRoot);
+            minNode->right =tempRoot;
+            minNode->left = currentRoot->left;
+
+            currentRoot->left = NULL;
+            currentRoot->right = NULL;
+            delete currentRoot;
+            currentRoot = minNode;
+
+        }
+        else if(currentFather->right == currentRoot)
+        {
+            minNode = findMin(currentRoot->right);
+            tempRoot = takeOutMin(currentRoot->right,NULL);
+            minNode->right =tempRoot;
+            minNode->left = currentRoot->left;
+            currentFather->right = minNode;
+
+            currentRoot->left = NULL;
+            currentRoot->right = NULL;
+            delete currentRoot;
+            currentRoot = currentFather->right;
+        }
+        else //the currentRoot is the left son
+        {
+            minNode = findMin(currentRoot->right);
+            tempRoot = takeOutMin(currentRoot->right,NULL);
+            minNode->right =tempRoot;
+            minNode->left = currentRoot->left;
+            currentFather->left = minNode;
+
+            currentRoot->left = NULL;
+            currentRoot->right = NULL;
+            delete currentRoot;
+            currentRoot = currentFather->left;
+        }
+    }
+        // case3.2: element is found with one or none subtrees
+    else {
+        temp = currentRoot;
+        if (currentRoot->right == NULL && currentRoot->left == NULL){
+            currentRoot = NULL;
+            delete temp;
+            return NULL;
+        }
+        else if (currentRoot->left == NULL){
+            if(currentFather != NULL)
+            {
+                if(currentRoot == currentFather->right)
+                    currentFather->right = currentRoot->right;
+                else
+                    currentFather->left = currentRoot->right;
+            }
+            currentRoot = currentRoot->right;
+            delete temp;
+        }
+        else if (currentRoot->right == NULL){
+            if(currentFather != NULL)
+            {
+                if(currentRoot == currentFather->right)
+                    currentFather->right = currentRoot->left;
+                else
+                    currentFather->left = currentRoot->left;
+            }
+            currentRoot = currentRoot->left;
+            delete temp;
+        }
+    }
+
+//    //in case v is the last on any subtree;
+//    if ( toRemove == NULL ){
+//        return v;
+//    }
+    //update new heights:
+    updateHeight(currentRoot);
+
+    //rotations if needed, from bottom -> up:
+    currentRoot = balance_Tree(currentRoot);
+    updateHeight(currentRoot);
+
+    return currentRoot;
+}
+
+///
+/// \tparam T
+/// \param currentRoot
+/// \param currentRootFather
+/// \return the root of fixed tree tithout the minimun
+template <class T>
+Node<T>* TreeNode<T>::takeOutMin(Node<T> *currentRoot,Node<T> *currentRootFather)
+{
+    if(currentRoot == NULL)
+        return NULL;
+    if(currentRoot->left == NULL)
+    {
+        if(currentRootFather == NULL) // currentruuot is ther root of the tree
+        {
+//            elementsCount--;
+            return currentRoot->right;
+        }
+        else {
+            Node<T> *temp = currentRoot;
+            if (currentRoot == currentRootFather->right) {
+                currentRootFather->right = currentRoot->right;
+                temp->right = NULL;
+                temp->left = NULL;
+//                elementsCount--;
+                updateHeight(currentRootFather);
+                currentRootFather = balance_Tree(currentRootFather);
+                updateHeight(currentRootFather);
+                return currentRootFather->right;
+            } else {
+                currentRootFather->left = currentRoot->right;
+                temp->right = NULL;
+                temp->left = NULL;
+//                elementsCount--;
+                updateHeight(currentRootFather);
+                currentRootFather = balance_Tree(currentRootFather);
+                updateHeight(currentRootFather);
+                return currentRootFather->left;
+            }
+        }
+    }
+    else
+    {
+        Node<T> *temp = takeOutMin(currentRoot->left,currentRoot);
+        if(temp != NULL)
+        {
+            updateHeight(temp);
+            temp = balance_Tree(temp);
+            updateHeight(temp);
+        }
+        return temp;
+    }
+
+//
+//    if(currentRootFather == NULL) // currentruuot is ther root of the tree
+//    {
+//        if(currentRoot->left == NULL)
+//        {
+////            *currentRoot = *currentRoot->right;
+//            elementsCount--;
+//            return currentRoot->right;
+//        }
+//        else
+//        {
+//            return takeOutMin(currentRoot->left);
+//        }
+//    }
+//    else
+//    {
+//        if(currentRoot->left == NULL)
+//        {
+//            Node<T> *temp = currentRoot;
+//            if(currentRoot== currentRootFather->right)
+//            {
+//                currentRootFather->right = currentRoot->right;
+//                temp->right=NULL;
+//                temp->left= NULL;
+//                elementsCount--;
+//                balance_Tree(currentRootFather);
+//                updateHeight(currentRootFather);
+//                balance_Tree(currentRootFather);
+//                return currentRootFather->right;
+//            }
+//            else
+//            {
+//                currentRootFather->left = currentRoot->right;
+//                temp->right=NULL;
+//                temp->left= NULL;
+//                elementsCount--;
+//                balance_Tree(currentRootFather);
+//                updateHeight(currentRootFather);
+//                balance_Tree(currentRootFather);
+//                return currentRootFather->right;            }
+//        }
+//        else
+//        {
+//            return takeOutMin(currentRoot->left);
+//        }
+//    }
+//
+}
+
+
+template<class T>
+Node<T>* findFather(Node<T>* currentRoot,Node<T>* value)
+{
+    if (currentRoot == NULL) return NULL;
+    if (currentRoot->get_key() == value->get_key()) return NULL;
+
+    if(currentRoot->get_right() != NULL)
+        if(currentRoot->get_right()->get_key() == value->get_key())
+            return currentRoot;
+    if(currentRoot->get_left() != NULL)
+        if(currentRoot->get_left()->get_key() == value->get_key())
+            return currentRoot;
+
+    if (currentRoot->get_key() < value->get_key()){
+        return findFather(currentRoot->get_right_nonConst(), value);
+    }
+    else{
+        return findFather(currentRoot->get_left_nonConst(), value);
+    }
+}
+
+
+//
+//template<class T>
+//template<class Condition>
+//Node<T>* findFatherBy(Node<T>* currentRoot,Node<T>* value, Condition condition)
+//{
+//    if (currentRoot == NULL) return NULL;
+//    if (condition(currentRoot->get_key(), value->get_key()) , Equality::EQUAL)return NULL;
+//
+//    if(currentRoot->get_right() != NULL)
+//        if(condition(currentRoot->get_right()->get_key(), value->get_key(), Equality::EQUAL))
+//            return currentRoot;
+//    if(currentRoot->get_left() != NULL)
+//        if(ccondition(currentRoot->get_left()->get_key(), value->get_key(), Equality::EQUAL))
+//            return currentRoot;
+//
+//    if (condition(currentRoot->get_key(),value->get_key(), Equality::LESS)){
+//        return findFather(currentRoot->get_right_nonConst(), value);
+//    }
+//    else{
+//        return findFather(currentRoot->get_left_nonConst(), value);
+//    }
+//}
+//
+
+
+
 
 /// @brief insert one element with a value.
 /// @tparam T -class type
@@ -810,9 +1122,12 @@ StatusType TreeNode<T>::removeBy(const T &value, Condition condition) {
         return StatusType::FAILURE;
     }
     // removing one element only if exists
-    if (findBy(value, condition) != NULL){
+    Node<T>* toRemove = findBy(value, condition);
+    if (toRemove != NULL){
         try {
             root = removeBy_inside(root, value, condition);
+//            Node<T>* fatherOfToRemove = findFatherBy(root ,toRemove, condition);
+//            root  = removeFromAVLBy(toRemove, root,fatherOfToRemove, condition);
         }
         catch(...){
             return StatusType::ALLOCATION_ERROR;
